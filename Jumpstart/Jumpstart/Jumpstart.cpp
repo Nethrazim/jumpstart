@@ -18,82 +18,21 @@
 #include <queue>
 #include <atomic>
 
+#include "http_request.h"
+#include "http_response.h"
+#include "tcp_ip_connection.h"
+#include "blocking_queue.h"
+
 #pragma comment(lib, "ws2_32.lib")
-
-// --------------------- Simple thread-safe queue ---------------------
-
-template<typename T>
-class BlockingQueue {
-public:
-    void push(T v) {
-        {
-            std::lock_guard<std::mutex> lock(m_);
-            q_.push(std::move(v));
-        }
-        cv_.notify_one();
-    }
-
-    T pop() {
-        std::unique_lock<std::mutex> lock(m_);
-        cv_.wait(lock, [&] { return !q_.empty() || stop_; });
-        if (stop_ && q_.empty())
-            return T{};
-        T v = std::move(q_.front());
-        q_.pop();
-        return v;
-    }
-
-    bool try_pop(T& out) {
-        std::lock_guard<std::mutex> lock(m_);
-        if (q_.empty()) return false;
-        out = std::move(q_.front());
-        q_.pop();
-        return true;
-    }
-
-    void stop() {
-        {
-            std::lock_guard<std::mutex> lock(m_);
-            stop_ = true;
-        }
-        cv_.notify_all();
-    }
-
-private:
-    std::mutex m_;
-    std::condition_variable cv_;
-    std::queue<T> q_;
-    bool stop_ = false;
-};
-
 // --------------------- HTTP types ---------------------
 
-struct HttpRequest {
-    SOCKET fd = INVALID_SOCKET;
-    std::string method;
-    std::string path;
-    std::string body;
-};
 
-struct HttpResponse {
-    SOCKET fd = INVALID_SOCKET;
-    std::string raw;
-};
 
-struct Connection {
-    SOCKET fd = INVALID_SOCKET;
-    std::string readBuf;
-    std::string writeBuf;
-    bool wantWrite = false;
-};
+extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
+extern BlockingQueue<HttpRequest> g_requestQueue;
+extern BlockingQueue<HttpResponse> g_responseQueue;
 
-// --------------------- Globals (for demo) ---------------------
-
-static std::unordered_map<SOCKET, Connection> g_connections;
 static std::mutex g_connMutex;
-
-static BlockingQueue<HttpRequest> g_reqQueue;
-static BlockingQueue<HttpResponse> g_respQueue;
 
 static std::atomic<bool> g_running{ true };
 
@@ -131,7 +70,7 @@ bool tryParseHttpRequest(std::string& buffer, HttpRequest& out) {
 
 void workerThreadFunc(int id) {
     while (g_running) {
-        HttpRequest req = g_reqQueue.pop();
+        HttpRequest req = g_requestQueue.pop();
         if (!g_running || req.fd == INVALID_SOCKET)
             break;
 
@@ -153,7 +92,7 @@ void workerThreadFunc(int id) {
             "\r\n" +
             body;
 
-        g_respQueue.push(std::move(resp));
+        g_responseQueue.push(std::move(resp));
     }
 }
 
@@ -161,10 +100,10 @@ void workerThreadFunc(int id) {
 
 void closeConnection(SOCKET fd) {
     std::lock_guard<std::mutex> lock(g_connMutex);
-    auto it = g_connections.find(fd);
-    if (it != g_connections.end()) {
+    auto it = g_tcpIpConnections.find(fd);
+    if (it != g_tcpIpConnections.end()) {
         closesocket(fd);
-        g_connections.erase(it);
+        g_tcpIpConnections.erase(it);
     }
 }
 
@@ -183,7 +122,7 @@ void handleAccept(SOCKET listenSock) {
         ioctlsocket(client, FIONBIO, &mode);
 
         std::lock_guard<std::mutex> lock(g_connMutex);
-        g_connections.emplace(client, Connection{ client });
+        g_tcpIpConnections.emplace(client, TcpIpConnection{ client });
         std::cout << "Accepted client " << client << "\n";
     }
 }
@@ -195,8 +134,8 @@ void handleRead(SOCKET fd) {
         int n = recv(fd, buf, sizeof(buf), 0);
         if (n > 0) {
             std::lock_guard<std::mutex> lock(g_connMutex);
-            auto it = g_connections.find(fd);
-            if (it == g_connections.end())
+            auto it = g_tcpIpConnections.find(fd);
+            if (it == g_tcpIpConnections.end())
                 return;
             it->second.readBuf.append(buf, n);
         }
@@ -219,24 +158,24 @@ void handleRead(SOCKET fd) {
         HttpRequest req;
         {
             std::lock_guard<std::mutex> lock(g_connMutex);
-            auto it = g_connections.find(fd);
-            if (it == g_connections.end())
+            auto it = g_tcpIpConnections.find(fd);
+            if (it == g_tcpIpConnections.end())
                 return;
             if (!tryParseHttpRequest(it->second.readBuf, req))
                 break;
         }
         req.fd = fd;
-        g_reqQueue.push(std::move(req));
+        g_requestQueue.push(std::move(req));
     }
 }
 
 void handleWrite(SOCKET fd) {
     std::lock_guard<std::mutex> lock(g_connMutex);
-    auto it = g_connections.find(fd);
-    if (it == g_connections.end())
+    auto it = g_tcpIpConnections.find(fd);
+    if (it == g_tcpIpConnections.end())
         return;
 
-    Connection& conn = it->second;
+    TcpIpConnection& conn = it->second;
     if (conn.writeBuf.empty()) {
         conn.wantWrite = false;
         return;
@@ -253,19 +192,19 @@ void handleWrite(SOCKET fd) {
         if (err != WSAEWOULDBLOCK) {
             std::cerr << "send error " << err << " on " << fd << "\n";
             closesocket(fd);
-            g_connections.erase(it);
+            g_tcpIpConnections.erase(it);
         }
     }
 }
 
 void drainWorkerResponses() {
     HttpResponse resp;
-    while (g_respQueue.try_pop(resp)) {
+    while (g_responseQueue.try_pop(resp)) {
         if (resp.fd == INVALID_SOCKET)
             continue;
         std::lock_guard<std::mutex> lock(g_connMutex);
-        auto it = g_connections.find(resp.fd);
-        if (it == g_connections.end())
+        auto it = g_tcpIpConnections.find(resp.fd);
+        if (it == g_tcpIpConnections.end())
             continue;
         it->second.writeBuf += resp.raw;
         it->second.wantWrite = true;
@@ -285,8 +224,8 @@ void ioLoop(SOCKET listenSock) {
 
         {
             std::lock_guard<std::mutex> lock(g_connMutex);
-            fds.reserve(1 + g_connections.size());
-            for (auto& kv : g_connections) {
+            fds.reserve(1 + g_tcpIpConnections.size());
+            for (auto& kv : g_tcpIpConnections) {
                 WSAPOLLFD p{};
                 p.fd = kv.first;
                 p.events = POLLRDNORM;
@@ -368,8 +307,8 @@ int main() {
 
     // Shutdown
     g_running = false;
-    g_reqQueue.stop();
-    g_respQueue.stop();
+    g_requestQueue.stop();
+    g_responseQueue.stop();
 
     for (auto& t : workers)
         t.join();

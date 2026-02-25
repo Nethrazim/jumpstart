@@ -123,7 +123,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="global_variables.cpp" />
+    <ClCompile Include="http_request.h" />
+    <ClCompile Include="http_response.h" />
     <ClCompile Include="Jumpstart.cpp" />
+    <ClCompile Include="tcp_ip_connection.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="blocking_queue.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

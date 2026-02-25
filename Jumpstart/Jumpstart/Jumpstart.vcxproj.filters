@@ -18,5 +18,22 @@
     <ClCompile Include="Jumpstart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="global_variables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="http_request.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="http_response.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tcp_ip_connection.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="blocking_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
