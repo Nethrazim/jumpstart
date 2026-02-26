@@ -2,11 +2,16 @@
 
 #include <WinSock2.h>
 #include <string>
+#include <map>
+
+using std::string;
+using std::map;
 
 struct HttpRequest
 {
 	SOCKET fd = INVALID_SOCKET;
-	std::string method;
-	std::string path;
-	std::string body;
+	string method;
+	string path;
+	string body;
+	map<string, string> headers;
 };
