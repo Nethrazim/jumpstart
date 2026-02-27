@@ -22,12 +22,13 @@
 #include "http_response.h"
 #include "tcp_ip_connection.h"
 #include "blocking_queue.h"
+#include "Router.h"
 
 #pragma comment(lib, "ws2_32.lib")
 // --------------------- HTTP types ---------------------
 
 
-
+Router g_router;
 extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
@@ -77,20 +78,7 @@ void workerThreadFunc(int id) {
         HttpResponse resp;
         resp.fd = req.fd;
 
-        std::string body = "Hello from worker " + std::to_string(id) +
-            " path=" + req.path + "\n";
-       body = u8R"(<!DOCTYPE html>
-            <body>
-            <span style="font-size:24px; color: red;">Mâța pe gheață</span>
-            </body>
-            </html>)";
-
-        resp.raw = "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/html; charset=utf-8\r\n"
-            "Connection: keep-alive\r\n"
-            "Content-Length: " + std::to_string(body.size()) + "\r\n"
-            "\r\n" +
-            body;
+        g_router.dispatch(req, resp);
 
         g_responseQueue.push(std::move(resp));
     }
@@ -108,8 +96,10 @@ void closeConnection(SOCKET fd) {
 }
 
 void handleAccept(SOCKET listenSock) {
+    
     while (true) {
         SOCKET client = accept(listenSock, nullptr, nullptr);
+        
         if (client == INVALID_SOCKET) {
             int err = WSAGetLastError();
             if (err == WSAEWOULDBLOCK)
@@ -119,12 +109,16 @@ void handleAccept(SOCKET listenSock) {
         }
 
         u_long mode = 1;
+        
         ioctlsocket(client, FIONBIO, &mode);
 
         std::lock_guard<std::mutex> lock(g_connMutex);
+        
         g_tcpIpConnections.emplace(client, TcpIpConnection{ client });
+        
         std::cout << "Accepted client " << client << "\n";
     }
+
 }
 
 void handleRead(SOCKET fd) {
@@ -263,7 +257,52 @@ void ioLoop(SOCKET listenSock) {
 
 // --------------------- Main ---------------------
 
+
+
+Response* handleGet(const Request& req) {
+    Response* resp = new Response();
+
+    std::string body = "Hello from GET " + req.path + "\n";
+    body += u8R"(<!DOCTYPE html>
+        <body>
+        <span style="font-size:24px; color: red;">Mâța pe gheață</span>
+        </body>
+        </html>)";
+    resp->raw = "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html; charset=utf-8\r\n"
+        "Connection: keep-alive\r\n"
+        "Content-Length: " + std::to_string(body.size()) + "\r\n"
+        "\r\n" +
+        body;
+
+    return resp;
+}
+
+
+Response* handleSubGet(const Request& req) {
+    Response* resp = new Response();
+
+    std::string body = "BYEBYE from GET " + req.path + "\n";
+    body += u8R"(<!DOCTYPE html>
+        <body>
+        <span style="font-size:24px; color: red;">Mâța pe gheață</span>
+        </body>
+        </html>)";
+    resp->raw = "HTTP/1.1 200 OK\r\n"
+        "Content-Type: text/html; charset=utf-8\r\n"
+        "Connection: keep-alive\r\n"
+        "Content-Length: " + std::to_string(body.size()) + "\r\n"
+        "\r\n" +
+        body;
+
+    return resp;
+}
+
 int main() {
+
+    g_router.get("/sub", handleSubGet);
+    g_router.get("/", handleGet);
+    
     WSADATA wsa;
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
         std::cerr << "WSAStartup failed\n";

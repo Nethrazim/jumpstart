@@ -13,3 +13,9 @@ struct HttpResponse
 	map<string, string> headers;
 	std::string raw;
 };
+
+struct Response 
+{
+	map<string, string> headers;
+	std::string raw;
+};

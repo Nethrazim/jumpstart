@@ -13,27 +13,42 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\http_server">
+      <UniqueIdentifier>{e67209d3-bcc9-407c-9ead-78b6460bbeed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\http_server">
+      <UniqueIdentifier>{7d8b986a-8a9c-4049-98ee-d4f1fcd003c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mvc">
+      <UniqueIdentifier>{eacde9c8-8caa-4f2e-ad3d-6c48639b3db0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mvc">
+      <UniqueIdentifier>{ce5a9c39-9ff7-4a37-a663-b272996628a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Jumpstart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="global_variables.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="http_request.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\http_server</Filter>
     </ClCompile>
     <ClCompile Include="http_response.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\http_server</Filter>
     </ClCompile>
     <ClCompile Include="tcp_ip_connection.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\http_server</Filter>
+    </ClCompile>
+    <ClCompile Include="global_variables.cpp">
+      <Filter>Source Files\http_server</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\http_server</Filter>
+    </ClInclude>
+    <ClInclude Include="Router.h">
+      <Filter>Header Files\mvc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,3 +15,11 @@ struct HttpRequest
 	string body;
 	map<string, string> headers;
 };
+
+struct Request 
+{
+	string method;
+	string path;
+	string body;
+	map<string, string> headers;
+};
