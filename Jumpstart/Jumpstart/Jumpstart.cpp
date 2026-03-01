@@ -23,8 +23,11 @@
 #include "tcp_ip_connection.h"
 #include "blocking_queue.h"
 #include "Router.h"
+#include "tcp_ip_listener.h"
 
 #pragma comment(lib, "ws2_32.lib")
+
+using std::cerr; 
 // --------------------- HTTP types ---------------------
 
 
@@ -298,51 +301,31 @@ Response* handleSubGet(const Request& req) {
     return resp;
 }
 
+TcpIpListener* tcpIpListener = nullptr;
 int main() {
 
     g_router.get("/sub", handleSubGet);
     g_router.get("/", handleGet);
     
-    WSADATA wsa;
-    if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-        std::cerr << "WSAStartup failed\n";
-        return 1;
+    tcpIpListener = TcpIpListener::getInstance();
+    tcpIpListener->init();
+
+    if (!tcpIpListener->isListening)
+    {
+        cerr << "TcpIpListener failed!\n";
     }
 
-    SOCKET listenSock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (listenSock == INVALID_SOCKET) {
-        std::cerr << "socket failed\n";
-        return 1;
-    }
-
-    u_long mode = 1;
-    ioctlsocket(listenSock, FIONBIO, &mode);
-
-    sockaddr_in addr{};
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    addr.sin_port = htons(8080);
-
-    if (bind(listenSock, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-        std::cerr << "bind failed\n";
-        return 1;
-    }
-
-    if (listen(listenSock, SOMAXCONN) == SOCKET_ERROR) {
-        std::cerr << "listen failed\n";
-        return 1;
-    }
-
-    std::cout << "Listening on port 8080\n";
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    DWORD nrOfProcessors = sysinfo.dwNumberOfProcessors;
 
     // Start worker threads
-    const int workerCount = 4;
     std::vector<std::thread> workers;
-    for (int i = 0; i < workerCount; ++i)
+    for (int i = 0; i < nrOfProcessors; ++i)
         workers.emplace_back(workerThreadFunc, i);
 
     // I/O loop in main thread (or you could move it to a separate thread)
-    ioLoop(listenSock);
+    ioLoop(tcpIpListener->getListenSocket());
 
     // Shutdown
     g_running = false;
@@ -352,7 +335,6 @@ int main() {
     for (auto& t : workers)
         t.join();
 
-    closesocket(listenSock);
-    WSACleanup();
+    tcpIpListener->release();
     return 0;
 }

@@ -42,6 +42,9 @@
     <ClCompile Include="global_variables.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
+    <ClCompile Include="tcp_ip_listener.cpp">
+      <Filter>Source Files\http_server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="Router.h">
       <Filter>Header Files\mvc</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp_ip_listener.h">
+      <Filter>Header Files\http_server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
