@@ -24,6 +24,7 @@
 #include "blocking_queue.h"
 #include "Router.h"
 #include "tcp_ip_listener.h"
+#include "tcp_ip_handler.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -73,8 +74,11 @@ bool tryParseHttpRequest(std::string& buffer, HttpRequest& out) {
 // --------------------- Worker thread ---------------------
 
 void workerThreadFunc(int id) {
+
     while (g_running) {
+
         HttpRequest req = g_requestQueue.pop();
+        
         if (!g_running || req.fd == INVALID_SOCKET)
             break;
 
@@ -101,6 +105,7 @@ void closeConnection(SOCKET fd) {
 void handleAccept(SOCKET listenSock) {
     
     while (true) {
+
         SOCKET client = accept(listenSock, nullptr, nullptr);
         
         if (client == INVALID_SOCKET) {
@@ -321,8 +326,13 @@ int main() {
 
     // Start worker threads
     std::vector<std::thread> workers;
+
     for (int i = 0; i < nrOfProcessors; ++i)
-        workers.emplace_back(workerThreadFunc, i);
+    {
+        TcpIpHandler* tcpIpHandler = new TcpIpHandler();
+        workers.emplace_back(&TcpIpHandler::run, tcpIpHandler);
+    }
+        
 
     // I/O loop in main thread (or you could move it to a separate thread)
     ioLoop(tcpIpListener->getListenSocket());

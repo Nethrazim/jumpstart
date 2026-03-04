@@ -127,12 +127,14 @@
     <ClCompile Include="http_request.h" />
     <ClCompile Include="http_response.h" />
     <ClCompile Include="Jumpstart.cpp" />
+    <ClCompile Include="tcp_ip_handler.cpp" />
     <ClCompile Include="tcp_ip_connection.h" />
     <ClCompile Include="tcp_ip_listener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h" />
     <ClInclude Include="Router.h" />
+    <ClInclude Include="tcp_ip_handler.h" />
     <ClInclude Include="tcp_ip_listener.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
