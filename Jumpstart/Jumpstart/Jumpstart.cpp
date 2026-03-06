@@ -36,9 +36,12 @@ Router g_router;
 extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
+extern std::vector<std::thread> g_workers;
+extern std::vector<TcpIpHandler*> g_tcpIpHandlers;
 
 static std::mutex g_connMutex;
 
+void placeHttpRequest(HttpRequest&& req);
 static std::atomic<bool> g_running{ true };
 
 // --------------------- Very tiny HTTP parser ---------------------
@@ -120,13 +123,10 @@ void handleAccept(SOCKET listenSock) {
         
         ioctlsocket(client, FIONBIO, &mode);
 
-        std::lock_guard<std::mutex> lock(g_connMutex);
-        
         g_tcpIpConnections.emplace(client, TcpIpConnection{ client });
         
         std::cout << "Accepted client " << client << "\n";
     }
-
 }
 
 void handleRead(SOCKET fd) {
@@ -167,23 +167,43 @@ void handleRead(SOCKET fd) {
                 break;
         }
         req.fd = fd;
-        g_requestQueue.push(std::move(req));
+
+		//TODO : add to tcp ip handler queue instead of global queue, to avoid contention
+
+        placeHttpRequest(std::move(req));
+    }
+}   
+
+void placeHttpRequest(HttpRequest&& req)
+{
+    static int placeId = 0;
+    g_tcpIpHandlers.at(placeId)->pushHttpRequest(req);
+    
+    placeId++;
+    if (placeId > g_tcpIpHandlers.size() - 1)
+    {
+        placeId = 0;
     }
 }
 
 void handleWrite(SOCKET fd) {
+
     std::lock_guard<std::mutex> lock(g_connMutex);
+
     auto it = g_tcpIpConnections.find(fd);
+
     if (it == g_tcpIpConnections.end())
         return;
 
     TcpIpConnection& conn = it->second;
+
     if (conn.writeBuf.empty()) {
         conn.wantWrite = false;
         return;
     }
 
     int n = send(fd, conn.writeBuf.data(), (int)conn.writeBuf.size(), 0);
+
     if (n > 0) {
         conn.writeBuf.erase(0, n);
         if (conn.writeBuf.empty())
@@ -216,51 +236,51 @@ void drainWorkerResponses() {
 // --------------------- I/O loop ---------------------
 
 void ioLoop(SOCKET listenSock) {
-    while (g_running) {
-        std::vector<WSAPOLLFD> fds;
 
-        WSAPOLLFD lf{};
-        lf.fd = listenSock;
-        lf.events = POLLRDNORM;
-        fds.push_back(lf);
+	while (g_running) {
 
-        {
-            std::lock_guard<std::mutex> lock(g_connMutex);
-            fds.reserve(1 + g_tcpIpConnections.size());
-            for (auto& kv : g_tcpIpConnections) {
-                WSAPOLLFD p{};
-                p.fd = kv.first;
-                p.events = POLLRDNORM;
-                if (kv.second.wantWrite)
-                    p.events |= POLLWRNORM;
-                fds.push_back(p);
-            }
-        }
+		std::vector<WSAPOLLFD> fileDescriptors;
 
-        int n = WSAPoll(fds.data(), (ULONG)fds.size(), 100);
-        if (n == SOCKET_ERROR) {
-            int err = WSAGetLastError();
-            std::cerr << "WSAPoll error: " << err << "\n";
-            continue;
-        }
+		WSAPOLLFD lf{};
+		lf.fd = listenSock;
+		lf.events = POLLRDNORM;
+		fileDescriptors.push_back(lf);
 
-        for (auto& p : fds) {
-            if (p.fd == listenSock) {
-                if (p.revents & POLLRDNORM)
-                    handleAccept(listenSock);
-            }
-            else {
-                if (p.revents & POLLRDNORM)
-                    handleRead(p.fd);
-                if (p.revents & POLLWRNORM)
-                    handleWrite(p.fd);
-                if (p.revents & (POLLERR | POLLHUP | POLLNVAL))
-                    closeConnection(p.fd);
-            }
-        }
+		for (auto& kv : g_tcpIpConnections) {
+			WSAPOLLFD pFd{};
+			pFd.fd = kv.first;
+			pFd.events = POLLRDNORM;
+			if (kv.second.wantWrite) {
+				pFd.events |= POLLWRNORM;
+			}
+			fileDescriptors.push_back(pFd);
+		}
 
-        drainWorkerResponses();
-    }
+		int n = WSAPoll(fileDescriptors.data(), (ULONG)fileDescriptors.size(), 100);
+
+		if (n == SOCKET_ERROR) {
+			int err = WSAGetLastError();
+			std::cerr << "WSAPoll error: " << err << "\n";
+			continue;
+		}
+
+		for (auto& p : fileDescriptors) {
+			if (p.fd == listenSock) {
+				if (p.revents & POLLRDNORM)
+					handleAccept(listenSock);
+			}
+			else {
+				if (p.revents & POLLRDNORM)
+					handleRead(p.fd);
+				if (p.revents & POLLWRNORM)
+					handleWrite(p.fd);
+				if (p.revents & (POLLERR | POLLHUP | POLLNVAL))
+					closeConnection(p.fd);
+			}
+		}
+
+		drainWorkerResponses();
+	}
 }
 
 // --------------------- Main ---------------------
@@ -331,6 +351,7 @@ int main() {
     {
         TcpIpHandler* tcpIpHandler = new TcpIpHandler();
         workers.emplace_back(&TcpIpHandler::run, tcpIpHandler);
+        g_tcpIpHandlers.push_back(tcpIpHandler);
     }
         
 

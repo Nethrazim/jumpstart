@@ -10,7 +10,7 @@ public:
 	bool isAlocated = false;
 	bool isRunning = true;
 
-	void pushHttpRequest(HttpRequest req);
+	void pushHttpRequest(HttpRequest& req);
 
 	void run();
 

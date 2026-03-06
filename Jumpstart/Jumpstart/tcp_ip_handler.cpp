@@ -6,12 +6,10 @@
 extern Router g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 
-void TcpIpHandler::pushHttpRequest(HttpRequest req)
+void TcpIpHandler::pushHttpRequest(HttpRequest& req)
 {
-	requestQueue_.emplace(req);
+	requestQueue_.emplace(std::move(req));
 }
-
-
 
 void TcpIpHandler::run()
 {

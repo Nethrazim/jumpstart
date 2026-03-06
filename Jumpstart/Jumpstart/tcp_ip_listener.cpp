@@ -56,7 +56,7 @@ bool TcpIpListener::init(int port, bool bindAndListen) {
 		}
 		isListening = true;
 
-		cout << "Listening on port " << addr.sin_port << endl;
+		cout << "Listening on port " << port << endl;
 	}
 
 	return true;
