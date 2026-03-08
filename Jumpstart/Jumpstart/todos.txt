@@ -1,0 +1,15 @@
+TODOS::
+
+1.body parameters, query parameters, url parameters
+2.http request pipeline for different http methods
+3.json serializer/deserializer
+4.static files
+5.dynamic pages , template if possible
+
+*.openssl support(integrate library)
+*.CORS support(HEADERS)
+*.support more headers
+*.chunked encoding
+*.gzip
+*.ioctl(maybe)
+*.maybe linux support

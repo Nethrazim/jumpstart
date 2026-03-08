@@ -5,11 +5,15 @@
 #include "blocking_queue.h"
 #include "http_request.h"
 #include "http_response.h"
+#include "router.h"
 
 class TcpIpHandler;
+class TcpIpListener;
 
 std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 BlockingQueue<HttpRequest> g_requestQueue;
 BlockingQueue<HttpResponse> g_responseQueue;
 std::vector<std::thread> workers;
 std::vector<TcpIpHandler*> g_tcpIpHandlers;
+TcpIpListener* g_tcpIpListener = nullptr;
+Router g_router;

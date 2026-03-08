@@ -27,7 +27,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Jumpstart.cpp">
+    <ClCompile Include="jumpstart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="http_request.h">
@@ -48,12 +48,15 @@
     <ClCompile Include="tcp_ip_handler.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
+    <ClCompile Include="router.cpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
-    <ClInclude Include="Router.h">
+    <ClInclude Include="router.h">
       <Filter>Header Files\mvc</Filter>
     </ClInclude>
     <ClInclude Include="tcp_ip_listener.h">

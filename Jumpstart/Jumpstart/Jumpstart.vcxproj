@@ -126,14 +126,15 @@
     <ClCompile Include="global_variables.cpp" />
     <ClCompile Include="http_request.h" />
     <ClCompile Include="http_response.h" />
-    <ClCompile Include="Jumpstart.cpp" />
+    <ClCompile Include="jumpstart.cpp" />
+    <ClCompile Include="router.cpp" />
     <ClCompile Include="tcp_ip_handler.cpp" />
     <ClCompile Include="tcp_ip_connection.h" />
     <ClCompile Include="tcp_ip_listener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h" />
-    <ClInclude Include="Router.h" />
+    <ClInclude Include="router.h" />
     <ClInclude Include="tcp_ip_handler.h" />
     <ClInclude Include="tcp_ip_listener.h" />
   </ItemGroup>

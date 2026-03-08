@@ -22,7 +22,7 @@
 #include "http_response.h"
 #include "tcp_ip_connection.h"
 #include "blocking_queue.h"
-#include "Router.h"
+#include "router.h"
 #include "tcp_ip_listener.h"
 #include "tcp_ip_handler.h"
 
@@ -32,7 +32,7 @@ using std::cerr;
 // --------------------- HTTP types ---------------------
 
 
-Router g_router;
+extern Router g_router;
 extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
@@ -41,14 +41,14 @@ extern std::vector<TcpIpHandler*> g_tcpIpHandlers;
 
 static std::mutex g_connMutex;
 
-void placeHttpRequest(HttpRequest&& req);
+void placeHttpRequest(HttpRequest* req);
 static std::atomic<bool> g_running{ true };
 
 // --------------------- Very tiny HTTP parser ---------------------
 // Extremely naive: looks for "\r\n\r\n" and treats everything before as headers.
 // Ignores Content-Length and body for simplicity.
 
-bool tryParseHttpRequest(std::string& buffer, HttpRequest& out) {
+bool tryParseHttpRequest(std::string& buffer, HttpRequest* out) {
     std::size_t pos = buffer.find("\r\n\r\n");
     if (pos == std::string::npos)
         return false;
@@ -67,31 +67,11 @@ bool tryParseHttpRequest(std::string& buffer, HttpRequest& out) {
     std::size_t pEnd = requestLine.find(' ', mEnd + 1);
     if (pEnd == std::string::npos) return false;
 
-    out.method = requestLine.substr(0, mEnd);
-    out.path = requestLine.substr(mEnd + 1, pEnd - (mEnd + 1));
-    out.body.clear(); // ignoring body
+    out->method = requestLine.substr(0, mEnd);
+    out->path = requestLine.substr(mEnd + 1, pEnd - (mEnd + 1));
+    out->body.clear(); // ignoring body
 
     return true;
-}
-
-// --------------------- Worker thread ---------------------
-
-void workerThreadFunc(int id) {
-
-    while (g_running) {
-
-        HttpRequest req = g_requestQueue.pop();
-        
-        if (!g_running || req.fd == INVALID_SOCKET)
-            break;
-
-        HttpResponse resp;
-        resp.fd = req.fd;
-
-        g_router.dispatch(req, resp);
-
-        g_responseQueue.push(std::move(resp));
-    }
 }
 
 // --------------------- Connection helpers ---------------------
@@ -157,7 +137,7 @@ void handleRead(SOCKET fd) {
     }
 
     while (true) {
-        HttpRequest req;
+        HttpRequest* req = new HttpRequest();
         {
             std::lock_guard<std::mutex> lock(g_connMutex);
             auto it = g_tcpIpConnections.find(fd);
@@ -166,15 +146,13 @@ void handleRead(SOCKET fd) {
             if (!tryParseHttpRequest(it->second.readBuf, req))
                 break;
         }
-        req.fd = fd;
+        req->fd = fd;
 
-		//TODO : add to tcp ip handler queue instead of global queue, to avoid contention
-
-        placeHttpRequest(std::move(req));
+        placeHttpRequest(req);
     }
 }   
 
-void placeHttpRequest(HttpRequest&& req)
+void placeHttpRequest(HttpRequest* req)
 {
     static int placeId = 0;
     g_tcpIpHandlers.at(placeId)->pushHttpRequest(req);
@@ -233,9 +211,7 @@ void drainWorkerResponses() {
     }
 }
 
-// --------------------- I/O loop ---------------------
-
-void ioLoop(SOCKET listenSock) {
+void tcpServerLoop(SOCKET listenSock) {
 
 	while (g_running) {
 
@@ -326,16 +302,21 @@ Response* handleSubGet(const Request& req) {
     return resp;
 }
 
-TcpIpListener* tcpIpListener = nullptr;
-int main() {
+extern TcpIpListener* g_tcpIpListener;
 
+void asc(HttpRequest&& r)
+{
+    HttpRequest r2(std::move(r));
+}
+
+int main() {
     g_router.get("/sub", handleSubGet);
     g_router.get("/", handleGet);
     
-    tcpIpListener = TcpIpListener::getInstance();
-    tcpIpListener->init();
+    g_tcpIpListener = TcpIpListener::getInstance();
+    g_tcpIpListener->init();
 
-    if (!tcpIpListener->isListening)
+    if (!g_tcpIpListener->isListening)
     {
         cerr << "TcpIpListener failed!\n";
     }
@@ -356,7 +337,7 @@ int main() {
         
 
     // I/O loop in main thread (or you could move it to a separate thread)
-    ioLoop(tcpIpListener->getListenSocket());
+    tcpServerLoop(g_tcpIpListener->getListenSocket());
 
     // Shutdown
     g_running = false;
@@ -366,6 +347,6 @@ int main() {
     for (auto& t : workers)
         t.join();
 
-    tcpIpListener->release();
+    g_tcpIpListener->release();
     return 0;
 }
