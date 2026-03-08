@@ -5,6 +5,7 @@ TODOS::
 3.json serializer/deserializer
 4.static files
 5.dynamic pages , template if possible
+6.renaming , not ok
 
 *.openssl support(integrate library)
 *.CORS support(HEADERS)
