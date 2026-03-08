@@ -3,7 +3,7 @@
 #include <queue>
 #include "http_request.h"
 
-class TcpIpHandler
+class RequestHandler
 {
 
 public:

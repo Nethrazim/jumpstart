@@ -24,7 +24,7 @@
 #include "blocking_queue.h"
 #include "router.h"
 #include "tcp_ip_listener.h"
-#include "tcp_ip_handler.h"
+#include "request_handler.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -37,16 +37,12 @@ extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::vector<std::thread> g_workers;
-extern std::vector<TcpIpHandler*> g_tcpIpHandlers;
+extern std::vector<RequestHandler*> g_requestHandlers;
 
 static std::mutex g_connMutex;
 
 void placeHttpRequest(HttpRequest* req);
 static std::atomic<bool> g_running{ true };
-
-// --------------------- Very tiny HTTP parser ---------------------
-// Extremely naive: looks for "\r\n\r\n" and treats everything before as headers.
-// Ignores Content-Length and body for simplicity.
 
 bool tryParseHttpRequest(std::string& buffer, HttpRequest* out) {
     std::size_t pos = buffer.find("\r\n\r\n");
@@ -155,10 +151,10 @@ void handleRead(SOCKET fd) {
 void placeHttpRequest(HttpRequest* req)
 {
     static int placeId = 0;
-    g_tcpIpHandlers.at(placeId)->pushHttpRequest(req);
+    g_requestHandlers.at(placeId)->pushHttpRequest(req);
     
     placeId++;
-    if (placeId > g_tcpIpHandlers.size() - 1)
+    if (placeId > g_requestHandlers.size() - 1)
     {
         placeId = 0;
     }
@@ -330,9 +326,9 @@ int main() {
 
     for (int i = 0; i < nrOfProcessors; ++i)
     {
-        TcpIpHandler* tcpIpHandler = new TcpIpHandler();
-        workers.emplace_back(&TcpIpHandler::run, tcpIpHandler);
-        g_tcpIpHandlers.push_back(tcpIpHandler);
+        RequestHandler* requestHandler = new RequestHandler();
+        workers.emplace_back(&RequestHandler::run, requestHandler);
+        g_requestHandlers.push_back(requestHandler);
     }
         
 

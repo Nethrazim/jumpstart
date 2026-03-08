@@ -1,4 +1,4 @@
-#include "tcp_ip_handler.h"
+#include "request_handler.h"
 #include "http_response.h"
 #include "router.h"
 #include "blocking_queue.h"
@@ -6,12 +6,12 @@
 extern Router g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 
-void TcpIpHandler::pushHttpRequest(HttpRequest* req)
+void RequestHandler::pushHttpRequest(HttpRequest* req)
 {
 	requestQueue_.emplace(req);
 }
 
-void TcpIpHandler::run()
+void RequestHandler::run()
 {
     while (isRunning) {
         HttpRequest* req = nullptr;

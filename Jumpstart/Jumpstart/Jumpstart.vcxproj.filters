@@ -45,7 +45,7 @@
     <ClCompile Include="tcp_ip_listener.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
-    <ClCompile Include="tcp_ip_handler.cpp">
+    <ClCompile Include="requet_handler.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
     <ClCompile Include="router.cpp">
@@ -62,8 +62,11 @@
     <ClInclude Include="tcp_ip_listener.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
-    <ClInclude Include="tcp_ip_handler.h">
+    <ClInclude Include="request_handler.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todos.txt" />
   </ItemGroup>
 </Project>

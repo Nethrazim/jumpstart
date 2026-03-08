@@ -128,15 +128,18 @@
     <ClCompile Include="http_response.h" />
     <ClCompile Include="jumpstart.cpp" />
     <ClCompile Include="router.cpp" />
-    <ClCompile Include="tcp_ip_handler.cpp" />
+    <ClCompile Include="requet_handler.cpp" />
     <ClCompile Include="tcp_ip_connection.h" />
     <ClCompile Include="tcp_ip_listener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h" />
     <ClInclude Include="router.h" />
-    <ClInclude Include="tcp_ip_handler.h" />
+    <ClInclude Include="request_handler.h" />
     <ClInclude Include="tcp_ip_listener.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="todos.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

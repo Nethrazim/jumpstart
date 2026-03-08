@@ -7,13 +7,13 @@
 #include "http_response.h"
 #include "router.h"
 
-class TcpIpHandler;
+class RequestHandler;
 class TcpIpListener;
 
 std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 BlockingQueue<HttpRequest> g_requestQueue;
 BlockingQueue<HttpResponse> g_responseQueue;
 std::vector<std::thread> workers;
-std::vector<TcpIpHandler*> g_tcpIpHandlers;
+std::vector<RequestHandler*> g_requestHandlers;
 TcpIpListener* g_tcpIpListener = nullptr;
 Router g_router;
