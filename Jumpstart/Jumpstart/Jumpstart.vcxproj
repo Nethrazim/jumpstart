@@ -123,9 +123,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="app-router.cpp" />
+    <ClCompile Include="app-router.h" />
     <ClCompile Include="global_variables.cpp" />
     <ClCompile Include="http_request.h" />
     <ClCompile Include="http_response.h" />
+    <ClCompile Include="init-controller.cpp" />
     <ClCompile Include="jumpstart.cpp" />
     <ClCompile Include="router.cpp" />
     <ClCompile Include="requet_handler.cpp" />
@@ -134,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h" />
+    <ClInclude Include="init-controller.h" />
     <ClInclude Include="router.h" />
     <ClInclude Include="request_handler.h" />
     <ClInclude Include="tcp_ip_listener.h" />

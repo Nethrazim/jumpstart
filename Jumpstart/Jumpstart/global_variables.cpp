@@ -5,7 +5,7 @@
 #include "blocking_queue.h"
 #include "http_request.h"
 #include "http_response.h"
-#include "router.h"
+#include "app-router.h"
 
 class RequestHandler;
 class TcpIpListener;
@@ -16,4 +16,4 @@ BlockingQueue<HttpResponse> g_responseQueue;
 std::vector<std::thread> workers;
 std::vector<RequestHandler*> g_requestHandlers;
 TcpIpListener* g_tcpIpListener = nullptr;
-Router g_router;
+AppRouter g_router;

@@ -1,9 +1,9 @@
 #include "request_handler.h"
 #include "http_response.h"
-#include "router.h"
+#include "app-router.h"
 #include "blocking_queue.h"
 
-extern Router g_router;
+extern AppRouter g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 
 void RequestHandler::pushHttpRequest(HttpRequest* req)

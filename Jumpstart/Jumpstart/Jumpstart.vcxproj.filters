@@ -25,11 +25,14 @@
     <Filter Include="Source Files\mvc">
       <UniqueIdentifier>{ce5a9c39-9ff7-4a37-a663-b272996628a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\app">
+      <UniqueIdentifier>{6630bef8-1e25-4558-8e71-6fb97cb53919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\app">
+      <UniqueIdentifier>{48b14065-f124-4a12-9e07-56e106074627}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="jumpstart.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="http_request.h">
       <Filter>Header Files\http_server</Filter>
     </ClCompile>
@@ -51,6 +54,18 @@
     <ClCompile Include="router.cpp">
       <Filter>Header Files\mvc</Filter>
     </ClCompile>
+    <ClCompile Include="jumpstart.cpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClCompile>
+    <ClCompile Include="init-controller.cpp">
+      <Filter>Header Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="app-router.h">
+      <Filter>Header Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="app-router.cpp">
+      <Filter>Header Files\app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h">
@@ -64,6 +79,9 @@
     </ClInclude>
     <ClInclude Include="request_handler.h">
       <Filter>Header Files\http_server</Filter>
+    </ClInclude>
+    <ClInclude Include="init-controller.h">
+      <Filter>Header Files\app</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

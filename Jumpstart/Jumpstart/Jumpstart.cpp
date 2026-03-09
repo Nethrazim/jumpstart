@@ -22,7 +22,7 @@
 #include "http_response.h"
 #include "tcp_ip_connection.h"
 #include "blocking_queue.h"
-#include "router.h"
+#include "app-router.h"
 #include "tcp_ip_listener.h"
 #include "request_handler.h"
 
@@ -32,7 +32,7 @@ using std::cerr;
 // --------------------- HTTP types ---------------------
 
 
-extern Router g_router;
+extern AppRouter g_router;
 extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
@@ -306,9 +306,8 @@ void asc(HttpRequest&& r)
 }
 
 int main() {
-    g_router.get("/sub", handleSubGet);
-    g_router.get("/", handleGet);
-    
+    g_router.setRoutes();
+
     g_tcpIpListener = TcpIpListener::getInstance();
     g_tcpIpListener->init();
 
