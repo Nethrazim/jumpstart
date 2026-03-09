@@ -57,14 +57,14 @@
     <ClCompile Include="jumpstart.cpp">
       <Filter>Header Files\mvc</Filter>
     </ClCompile>
-    <ClCompile Include="init-controller.cpp">
-      <Filter>Header Files\app</Filter>
-    </ClCompile>
     <ClCompile Include="app-router.h">
       <Filter>Header Files\app</Filter>
     </ClCompile>
     <ClCompile Include="app-router.cpp">
-      <Filter>Header Files\app</Filter>
+      <Filter>Source Files\app</Filter>
+    </ClCompile>
+    <ClCompile Include="init-controller.cpp">
+      <Filter>Source Files\app</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="init-controller.h">
       <Filter>Header Files\app</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

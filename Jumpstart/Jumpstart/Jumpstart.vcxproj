@@ -138,6 +138,7 @@
   <ItemGroup>
     <ClInclude Include="blocking_queue.h" />
     <ClInclude Include="init-controller.h" />
+    <ClInclude Include="platform.h" />
     <ClInclude Include="router.h" />
     <ClInclude Include="request_handler.h" />
     <ClInclude Include="tcp_ip_listener.h" />

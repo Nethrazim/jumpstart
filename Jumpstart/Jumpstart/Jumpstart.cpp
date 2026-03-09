@@ -1,13 +1,7 @@
 ﻿// tiny_http_server.cpp
-// Build (MSVC example):
-//   cl /EHsc tiny_http_server.cpp ws2_32.lib
+// Cross-platform HTTP server
 
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include <mstcpip.h>
-#include <windows.h>
-
+#include "platform.h"
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -25,8 +19,6 @@
 #include "app-router.h"
 #include "tcp_ip_listener.h"
 #include "request_handler.h"
-
-#pragma comment(lib, "ws2_32.lib")
 
 using std::cerr; 
 // --------------------- HTTP types ---------------------
@@ -72,40 +64,38 @@ bool tryParseHttpRequest(std::string& buffer, HttpRequest* out) {
 
 // --------------------- Connection helpers ---------------------
 
-void closeConnection(SOCKET fd) {
+void closeConnection(socket_t fd) {
     std::lock_guard<std::mutex> lock(g_connMutex);
     auto it = g_tcpIpConnections.find(fd);
     if (it != g_tcpIpConnections.end()) {
-        closesocket(fd);
+        CLOSE_SOCKET(fd);
         g_tcpIpConnections.erase(it);
     }
 }
 
-void handleAccept(SOCKET listenSock) {
-    
+void handleAccept(socket_t listenSock) {
+
     while (true) {
 
-        SOCKET client = accept(listenSock, nullptr, nullptr);
-        
+        socket_t client = accept(listenSock, nullptr, nullptr);
+
         if (client == INVALID_SOCKET) {
-            int err = WSAGetLastError();
-            if (err == WSAEWOULDBLOCK)
+            int err = GET_SOCKET_ERROR();
+            if (err == WOULDBLOCK_ERROR)
                 break;
             std::cerr << "accept error: " << err << "\n";
             break;
         }
 
-        u_long mode = 1;
-        
-        ioctlsocket(client, FIONBIO, &mode);
+        SET_NONBLOCKING(client);
 
         g_tcpIpConnections.emplace(client, TcpIpConnection{ client });
-        
+
         std::cout << "Accepted client " << client << "\n";
     }
 }
 
-void handleRead(SOCKET fd) {
+void handleRead(socket_t fd) {
     char buf[4096];
 
     while (true) {
@@ -123,8 +113,8 @@ void handleRead(SOCKET fd) {
             return;
         }
         else {
-            int err = WSAGetLastError();
-            if (err == WSAEWOULDBLOCK)
+            int err = GET_SOCKET_ERROR();
+            if (err == WOULDBLOCK_ERROR)
                 break;
             std::cerr << "recv error " << err << " on " << fd << "\n";
             closeConnection(fd);
@@ -160,7 +150,7 @@ void placeHttpRequest(HttpRequest* req)
     }
 }
 
-void handleWrite(SOCKET fd) {
+void handleWrite(socket_t fd) {
 
     std::lock_guard<std::mutex> lock(g_connMutex);
 
@@ -184,10 +174,10 @@ void handleWrite(SOCKET fd) {
             conn.wantWrite = false;
     }
     else {
-        int err = WSAGetLastError();
-        if (err != WSAEWOULDBLOCK) {
+        int err = GET_SOCKET_ERROR();
+        if (err != WOULDBLOCK_ERROR) {
             std::cerr << "send error " << err << " on " << fd << "\n";
-            closesocket(fd);
+            CLOSE_SOCKET(fd);
             g_tcpIpConnections.erase(it);
         }
     }
@@ -207,19 +197,19 @@ void drainWorkerResponses() {
     }
 }
 
-void tcpServerLoop(SOCKET listenSock) {
+void tcpServerLoop(socket_t listenSock) {
 
 	while (g_running) {
 
-		std::vector<WSAPOLLFD> fileDescriptors;
+		std::vector<pollfd_t> fileDescriptors;
 
-		WSAPOLLFD lf{};
+		pollfd_t lf{};
 		lf.fd = listenSock;
 		lf.events = POLLRDNORM;
 		fileDescriptors.push_back(lf);
 
 		for (auto& kv : g_tcpIpConnections) {
-			WSAPOLLFD pFd{};
+			pollfd_t pFd{};
 			pFd.fd = kv.first;
 			pFd.events = POLLRDNORM;
 			if (kv.second.wantWrite) {
@@ -228,11 +218,11 @@ void tcpServerLoop(SOCKET listenSock) {
 			fileDescriptors.push_back(pFd);
 		}
 
-		int n = WSAPoll(fileDescriptors.data(), (ULONG)fileDescriptors.size(), 100);
+		int n = POLL(fileDescriptors.data(), fileDescriptors.size(), 100);
 
 		if (n == SOCKET_ERROR) {
-			int err = WSAGetLastError();
-			std::cerr << "WSAPoll error: " << err << "\n";
+			int err = GET_SOCKET_ERROR();
+			std::cerr << "Poll error: " << err << "\n";
 			continue;
 		}
 
@@ -316,9 +306,7 @@ int main() {
         cerr << "TcpIpListener failed!\n";
     }
 
-    SYSTEM_INFO sysinfo;
-    GetSystemInfo(&sysinfo);
-    DWORD nrOfProcessors = sysinfo.dwNumberOfProcessors;
+    unsigned int nrOfProcessors = get_processor_count();
 
     // Start worker threads
     std::vector<std::thread> workers;

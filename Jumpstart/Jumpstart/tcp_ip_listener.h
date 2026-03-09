@@ -1,6 +1,6 @@
 #pragma once
 
-#include "winsock2.h"
+#include "platform.h"
 
 class TcpIpListener
 {
@@ -15,12 +15,11 @@ public:
 
 	static TcpIpListener* getInstance();
 
-	SOCKET& getListenSocket();
+	socket_t& getListenSocket();
 
 	void release();
 private:
-	WSADATA wsa;
-	SOCKET listenSocket;
+	socket_t listenSocket;
 	sockaddr_in addr{};
 	TcpIpListener();
 	static TcpIpListener* instance_;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <WinSock2.h>
+#include "platform.h"
 #include <string>
 #include <map>
 
@@ -9,7 +9,7 @@ using std::string;
 
 struct HttpResponse
 {
-	SOCKET fd = INVALID_SOCKET;
+	socket_t fd = INVALID_SOCKET;
 	map<string, string> headers;
 	std::string raw;
 };

@@ -1,10 +1,10 @@
 #pragma once
 
-#include <WinSock2.h>
+#include "platform.h"
 #include <string>
 
 struct TcpIpConnection {
-	SOCKET fd = INVALID_SOCKET;
+	socket_t fd = INVALID_SOCKET;
 	std::string readBuf;
 	std::string writeBuf;
 	bool wantWrite = false;

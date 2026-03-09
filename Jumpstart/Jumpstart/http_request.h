@@ -1,6 +1,6 @@
 #pragma once
 
-#include <WinSock2.h>
+#include "platform.h"
 #include <string>
 #include <map>
 #include <iostream>
@@ -10,7 +10,7 @@ using std::map;
 
 struct HttpRequest
 {
-	SOCKET fd = INVALID_SOCKET;
+	socket_t fd = INVALID_SOCKET;
 	string method;
 	string path;
 	string body;

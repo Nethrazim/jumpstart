@@ -1,6 +1,8 @@
 #include "tcp_ip_listener.h"
+#include "platform.h"
 
 #include <iostream>
+#include <cstring>
 using std::cerr; using std::cout; using std::endl;
 
 TcpIpListener::TcpIpListener() {
@@ -8,28 +10,26 @@ TcpIpListener::TcpIpListener() {
 	isBound = false;
 	isListening = false;
 	listenSocket = INVALID_SOCKET;
-	memset(&wsa,0, sizeof(wsa));
 }
 
 bool TcpIpListener::init(int port, bool bindAndListen) {
 
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
-		std::cerr << "WSAStartup failed\n";
-		return 1;
+	if (!Platform::initialize()) {
+		std::cerr << "Platform initialization failed\n";
+		return false;
 	}
 
 	listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	
+
 	if (listenSocket == INVALID_SOCKET) {
 		cerr << "socket failed\n";
 		isInitialized = false;
 		return false;
 	}
 
-	//set non blocking mode
-	u_long mode = 1;
-	ioctlsocket(listenSocket, FIONBIO, &mode);
-	
+	// Set non-blocking mode
+	SET_NONBLOCKING(listenSocket);
+
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	addr.sin_port = htons(port);
@@ -39,7 +39,7 @@ bool TcpIpListener::init(int port, bool bindAndListen) {
 	if (bindAndListen)
 	{
 		if (bind(listenSocket, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-			int err = WSAGetLastError();
+			int err = GET_SOCKET_ERROR();
 			cerr << "Socket bind failed, error: " << err << endl;
 			isBound = false;
 			return false;
@@ -49,7 +49,7 @@ bool TcpIpListener::init(int port, bool bindAndListen) {
 
 
 		if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-			int err = WSAGetLastError();
+			int err = GET_SOCKET_ERROR();
 			cerr << "Socket listen failed, error: " << err << endl;
 			isListening = false;
 			return false;
@@ -102,7 +102,7 @@ bool TcpIpListener::socketListen()
 	return isListening;
 }
 
-SOCKET& TcpIpListener::getListenSocket() {
+socket_t& TcpIpListener::getListenSocket() {
 	return listenSocket;
 }
 
@@ -116,15 +116,15 @@ TcpIpListener* TcpIpListener::getInstance() {
 }
 
 void TcpIpListener::release() {
-	if (listenSocket != SOCKET_ERROR)
+	if (listenSocket != INVALID_SOCKET)
 	{
-		closesocket(listenSocket);
+		CLOSE_SOCKET(listenSocket);
 	}
-	
-	WSACleanup();
+
+	Platform::cleanup();
 }
 
 TcpIpListener::~TcpIpListener() {
-	
+
 }
 
