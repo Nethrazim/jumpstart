@@ -44,6 +44,7 @@ bool extractHeader(std::string& buffer, std::string& headersBuffer) {
 
 	headersBuffer = buffer.substr(0, pos);
 	buffer.erase(0, pos + 4);
+	return true;
 }
 
 bool mapHttpLine(std::string& headersBuffer, HttpRequest* request)
@@ -57,15 +58,16 @@ bool mapHttpLine(std::string& headersBuffer, HttpRequest* request)
 	std::string requestLine = headersBuffer.substr(0, pos);
 	size_t mEnd = requestLine.find(' ');
 	if (mEnd == std::string::npos) return false;
-	
+
 	size_t pEnd = requestLine.find(' ', mEnd + 1);
 	if (pEnd == std::string::npos) return false;
-	
+
 	request->method = requestLine.substr(0, mEnd);
 	request->path = requestLine.substr(mEnd + 1, pEnd - (mEnd + 1));
 	request->body.clear();
-	
+
 	headersBuffer.erase(0, pos + 2);
+	return true;
 }
 
 bool mapHeaders(std::string& headersBuffer, HttpRequest* request) {
