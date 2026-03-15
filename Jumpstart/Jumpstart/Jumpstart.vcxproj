@@ -131,7 +131,7 @@
     <ClCompile Include="init-controller.cpp" />
     <ClCompile Include="jumpstart.cpp" />
     <ClCompile Include="router.cpp" />
-    <ClCompile Include="requet_handler.cpp" />
+    <ClCompile Include="request_handler.cpp" />
     <ClCompile Include="tcp_ip_connection.h" />
     <ClCompile Include="tcp_ip_listener.cpp" />
   </ItemGroup>
