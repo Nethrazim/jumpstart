@@ -32,5 +32,7 @@ void RequestHandler::run()
         g_router.dispatch(*req, resp);
 
         g_responseQueue.push(std::move(resp));
+
+        delete req;  // Free the HttpRequest after processing
     }
 }

@@ -107,11 +107,15 @@ void handleRead(socket_t fd) {
         {
             std::lock_guard<std::mutex> lock(g_connMutex);
             auto it = g_tcpIpConnections.find(fd);
-            if (it == g_tcpIpConnections.end())
+            if (it == g_tcpIpConnections.end()) {
+                delete req;  // Clean up before returning
                 return;
+            }
 
-            if (!tryParseHttpRequest(it->second.readBuf, req))
+            if (!tryParseHttpRequest(it->second.readBuf, req)) {
+                delete req;  // Clean up failed parse
                 break;
+            }
         }
         req->fd = fd;
 
@@ -310,6 +314,12 @@ int main() {
 
     for (auto& t : workers)
         t.join();
+
+    // Cleanup RequestHandler objects
+    for (RequestHandler* handler : g_requestHandlers) {
+        delete handler;
+    }
+    g_requestHandlers.clear();
 
     g_tcpIpListener->release();
     return 0;
