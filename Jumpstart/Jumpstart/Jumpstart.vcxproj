@@ -126,6 +126,7 @@
     <ClCompile Include="app-router.cpp" />
     <ClCompile Include="app-router.h" />
     <ClCompile Include="global_variables.cpp" />
+    <ClCompile Include="http-parser.cpp" />
     <ClCompile Include="http_request.h" />
     <ClCompile Include="http_response.h" />
     <ClCompile Include="init-controller.cpp" />

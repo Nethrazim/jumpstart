@@ -35,31 +35,11 @@ static std::mutex g_connMutex;
 
 void placeHttpRequest(HttpRequest* req);
 static std::atomic<bool> g_running{ true };
+bool parseHttpRequest(std::string&, HttpRequest* out);
 
-bool tryParseHttpRequest(std::string& buffer, HttpRequest* out) {
-    std::size_t pos = buffer.find("\r\n\r\n");
-    if (pos == std::string::npos)
-        return false;
-
-    std::string headerPart = buffer.substr(0, pos);
-    buffer.erase(0, pos + 4);
-
-    // First line: METHOD PATH HTTP/1.1
-    std::size_t lineEnd = headerPart.find("\r\n");
-    if (lineEnd == std::string::npos)
-        return false;
-
-    std::string requestLine = headerPart.substr(0, lineEnd);
-    std::size_t mEnd = requestLine.find(' ');
-    if (mEnd == std::string::npos) return false;
-    std::size_t pEnd = requestLine.find(' ', mEnd + 1);
-    if (pEnd == std::string::npos) return false;
-
-    out->method = requestLine.substr(0, mEnd);
-    out->path = requestLine.substr(mEnd + 1, pEnd - (mEnd + 1));
-    out->body.clear(); // ignoring body
-
-    return true;
+bool tryParseHttpRequest(std::string& buffer, HttpRequest* request) {
+    
+    return parseHttpRequest(buffer, request);
 }
 
 // --------------------- Connection helpers ---------------------
@@ -129,6 +109,7 @@ void handleRead(socket_t fd) {
             auto it = g_tcpIpConnections.find(fd);
             if (it == g_tcpIpConnections.end())
                 return;
+
             if (!tryParseHttpRequest(it->second.readBuf, req))
                 break;
         }

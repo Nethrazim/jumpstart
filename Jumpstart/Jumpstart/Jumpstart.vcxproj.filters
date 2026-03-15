@@ -66,6 +66,9 @@
     <ClCompile Include="init-controller.cpp">
       <Filter>Source Files\app</Filter>
     </ClCompile>
+    <ClCompile Include="http-parser.cpp">
+      <Filter>Header Files\http_server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blocking_queue.h">
