@@ -5,10 +5,13 @@ Response* InitController::handleGet(const Request& req)
 {
     Response* resp = new Response();
 
-    std::string body = "";
+    // Static - initialized only ONCE, reused for all requests
+    static const std::string htmlContent = []() {
+        std::string body;
+        body.reserve(15000);  // Pre-allocate to avoid reallocations
 
-    // Header and styles
-    body += R"(<!DOCTYPE html>
+        // Header and styles
+        body += R"(<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -188,8 +191,8 @@ Response* InitController::handleGet(const Request& req)
         </div>
       </div>)";
 
-    // Experience section - Part 1
-    body += R"(
+        // Experience section - Part 1
+        body += R"(
       <div class="section">
         <h2 class="section-title">Professional Experience</h2>
         <div class="job">
@@ -229,8 +232,8 @@ Response* InitController::handleGet(const Request& req)
           </div>
         </div>)";
 
-    // Experience section - Part 2
-    body += R"(
+        // Experience section - Part 2
+        body += R"(
         <div class="job">
           <div class="job-header">
             <div class="company">Programming Pool</div>
@@ -271,8 +274,8 @@ Response* InitController::handleGet(const Request& req)
         </div>
       </div>)";
 
-    // Projects section
-    body += R"(
+        // Projects section
+        body += R"(
       <div class="section">
         <h2 class="section-title">Open Source Projects</h2>
         <div class="project">
@@ -302,12 +305,15 @@ Response* InitController::handleGet(const Request& req)
 </body>
 </html>)";
 
+        return body;
+    }();  // ← Immediately invoked lambda (executes once)
+
     resp->raw = "HTTP/1.1 200 OK\r\n"
         "Content-Type: text/html; charset=utf-8\r\n"
         "Connection: keep-alive\r\n"
-        "Content-Length: " + std::to_string(body.size()) + "\r\n"
+        "Content-Length: " + std::to_string(htmlContent.size()) + "\r\n"
         "\r\n" +
-        body;
+        htmlContent;
 
     return resp;
 }
