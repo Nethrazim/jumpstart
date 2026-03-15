@@ -25,7 +25,7 @@ using std::cerr;
 
 
 extern AppRouter g_router;
-extern std::unordered_map<SOCKET, TcpIpConnection> g_tcpIpConnections;
+extern std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::vector<std::thread> g_workers;
