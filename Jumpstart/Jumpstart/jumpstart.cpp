@@ -1,7 +1,4 @@
-﻿// tiny_http_server.cpp
-// Cross-platform HTTP server
-
-#include "platform.h"
+﻿#include "platform.h"
 #include <iostream>
 #include <string>
 #include <unordered_map>
@@ -21,15 +18,17 @@
 #include "request_handler.h"
 
 using std::cerr; 
-// --------------------- HTTP types ---------------------
 
+extern TcpIpListener* g_tcpIpListener;
+extern std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
 
 extern AppRouter g_router;
-extern std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
 extern BlockingQueue<HttpRequest> g_requestQueue;
 extern BlockingQueue<HttpResponse> g_responseQueue;
+
 extern std::vector<std::thread> g_workers;
 extern std::vector<RequestHandler*> g_requestHandlers;
+
 
 static std::mutex g_connMutex;
 
@@ -37,12 +36,12 @@ void placeHttpRequest(HttpRequest* req);
 static std::atomic<bool> g_running{ true };
 bool parseHttpRequest(std::string&, HttpRequest* out);
 
+
 bool tryParseHttpRequest(std::string& buffer, HttpRequest* request) {
     
     return parseHttpRequest(buffer, request);
 }
 
-// --------------------- Connection helpers ---------------------
 
 void closeConnection(socket_t fd) {
     std::lock_guard<std::mutex> lock(g_connMutex);
@@ -108,12 +107,12 @@ void handleRead(socket_t fd) {
             std::lock_guard<std::mutex> lock(g_connMutex);
             auto it = g_tcpIpConnections.find(fd);
             if (it == g_tcpIpConnections.end()) {
-                delete req;  // Clean up before returning
+                delete req;
                 return;
             }
 
             if (!tryParseHttpRequest(it->second.readBuf, req)) {
-                delete req;  // Clean up failed parse
+                delete req;
                 break;
             }
         }
@@ -125,14 +124,16 @@ void handleRead(socket_t fd) {
 
 void placeHttpRequest(HttpRequest* req)
 {
-    static int placeId = 0;
-    g_requestHandlers.at(placeId)->pushHttpRequest(req);
-    
-    placeId++;
-    if (placeId > g_requestHandlers.size() - 1)
-    {
-        placeId = 0;
+    if (g_requestHandlers.empty()) {
+        std::cerr << "Error: No request handlers available!\n";
+        delete req; 
+        return;
     }
+
+    static size_t placeId = 0;
+    g_requestHandlers[placeId]->pushHttpRequest(req);
+
+    placeId = (placeId + 1) % g_requestHandlers.size();
 }
 
 void handleWrite(socket_t fd) {
@@ -230,56 +231,6 @@ void tcpServerLoop(socket_t listenSock) {
 	}
 }
 
-// --------------------- Main ---------------------
-
-
-
-Response* handleGet(const Request& req) {
-    Response* resp = new Response();
-
-    std::string body = "Hello from GET " + req.path + "\n";
-    body += u8R"(<!DOCTYPE html>
-        <body>
-        <span style="font-size:24px; color: red;">Mâța pe gheață</span>
-        </body>
-        </html>)";
-    resp->raw = "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html; charset=utf-8\r\n"
-        "Connection: keep-alive\r\n"
-        "Content-Length: " + std::to_string(body.size()) + "\r\n"
-        "\r\n" +
-        body;
-
-    return resp;
-}
-
-
-Response* handleSubGet(const Request& req) {
-    Response* resp = new Response();
-
-    std::string body = "BYEBYE from GET " + req.path + "\n";
-    body += u8R"(<!DOCTYPE html>
-        <body>
-        <span style="font-size:24px; color: red;">Mâța pe gheață</span>
-        </body>
-        </html>)";
-    resp->raw = "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html; charset=utf-8\r\n"
-        "Connection: keep-alive\r\n"
-        "Content-Length: " + std::to_string(body.size()) + "\r\n"
-        "\r\n" +
-        body;
-
-    return resp;
-}
-
-extern TcpIpListener* g_tcpIpListener;
-
-void asc(HttpRequest&& r)
-{
-    HttpRequest r2(std::move(r));
-}
-
 int main() {
     g_router.setRoutes();
 
@@ -293,7 +244,6 @@ int main() {
 
     unsigned int nrOfProcessors = get_processor_count();
 
-    // Start worker threads
     std::vector<std::thread> workers;
 
     for (int i = 0; i < nrOfProcessors; ++i)
@@ -303,11 +253,8 @@ int main() {
         g_requestHandlers.push_back(requestHandler);
     }
         
-
-    // I/O loop in main thread (or you could move it to a separate thread)
     tcpServerLoop(g_tcpIpListener->getListenSocket());
 
-    // Shutdown
     g_running = false;
     g_requestQueue.stop();
     g_responseQueue.stop();
@@ -315,7 +262,6 @@ int main() {
     for (auto& t : workers)
         t.join();
 
-    // Cleanup RequestHandler objects
     for (RequestHandler* handler : g_requestHandlers) {
         delete handler;
     }

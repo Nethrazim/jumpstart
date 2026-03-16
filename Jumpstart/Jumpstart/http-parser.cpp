@@ -42,6 +42,10 @@ bool extractHeader(std::string& buffer, std::string& headersBuffer) {
 		return false;
 	}
 
+	if (buffer.length() < pos + 4) {
+		return false;
+	}
+
 	headersBuffer = buffer.substr(0, pos);
 	buffer.erase(0, pos + 4);
 	return true;

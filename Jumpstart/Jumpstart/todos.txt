@@ -1,7 +1,7 @@
 TODOS::
 
 1.body parameters, query parameters, url parameters
-2.http request pipeline for different http methods
+2.http request pipeline for different http methods/support for other http methods
 3.json serializer/deserializer
 4.static files
 5.dynamic pages , template if possible
@@ -14,3 +14,6 @@ TODOS::
 *.gzip
 *.ioctl(maybe)
 *.maybe linux support
+
+*. implement several load balancing technique
+*. move worker threads 
