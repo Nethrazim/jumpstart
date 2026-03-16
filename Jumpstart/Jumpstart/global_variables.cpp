@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <vector>
 #include <thread>
+#include <atomic>
 
 #include "tcp_ip_connection.h"
 #include "blocking_queue.h"
@@ -19,3 +20,4 @@ std::vector<std::thread> workers;
 std::vector<RequestHandler*> g_requestHandlers;
 TcpIpListener* g_tcpIpListener = nullptr;
 AppRouter g_router;
+std::atomic<bool> g_running{ true };

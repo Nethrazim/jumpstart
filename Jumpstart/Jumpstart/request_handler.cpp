@@ -1,10 +1,15 @@
-#include "request_handler.h"
-#include "http_response.h"
+#include <atomic>
+
 #include "app-router.h"
+#include "http_response.h"
 #include "blocking_queue.h"
+#include "request_handler.h"
+
+
 
 extern AppRouter g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
+extern std::atomic<bool> g_running;
 
 void RequestHandler::pushHttpRequest(HttpRequest* req)
 {
@@ -13,14 +18,14 @@ void RequestHandler::pushHttpRequest(HttpRequest* req)
 
 void RequestHandler::run()
 {
-    while (isRunning) {
+    while (g_running) {
         HttpRequest* req = nullptr;
        
         if (!requestQueue_.empty()) {
             req = requestQueue_.front();
             requestQueue_.pop();
         } else {
-            continue; // Skip iteration if queue is empty
+            continue;
         }
 
         if (!isRunning || req->fd == INVALID_SOCKET)
@@ -33,6 +38,6 @@ void RequestHandler::run()
 
         g_responseQueue.push(std::move(resp));
 
-        delete req;  // Free the HttpRequest after processing
+        delete req; 
     }
 }

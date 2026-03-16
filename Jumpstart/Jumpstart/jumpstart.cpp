@@ -33,7 +33,7 @@ extern std::vector<RequestHandler*> g_requestHandlers;
 static std::mutex g_connMutex;
 
 void placeHttpRequest(HttpRequest* req);
-static std::atomic<bool> g_running{ true };
+extern std::atomic<bool> g_running;  // Defined in global_variables.cpp
 bool parseHttpRequest(std::string&, HttpRequest* out);
 
 
