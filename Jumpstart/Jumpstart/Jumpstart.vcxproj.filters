@@ -31,6 +31,12 @@
     <Filter Include="Source Files\app">
       <UniqueIdentifier>{48b14065-f124-4a12-9e07-56e106074627}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\app\controllers">
+      <UniqueIdentifier>{1fc87253-2297-4d25-b698-d9dd4abd56e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\app\controllers">
+      <UniqueIdentifier>{11f402f3-a34c-4076-b88d-3510bb3655ea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="http_request.h">
@@ -48,9 +54,6 @@
     <ClCompile Include="tcp_ip_listener.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
-    <ClCompile Include="requet_handler.cpp">
-      <Filter>Source Files\http_server</Filter>
-    </ClCompile>
     <ClCompile Include="router.cpp">
       <Filter>Header Files\mvc</Filter>
     </ClCompile>
@@ -63,11 +66,14 @@
     <ClCompile Include="app-router.cpp">
       <Filter>Source Files\app</Filter>
     </ClCompile>
-    <ClCompile Include="init-controller.cpp">
-      <Filter>Source Files\app</Filter>
-    </ClCompile>
     <ClCompile Include="http-parser.cpp">
       <Filter>Header Files\http_server</Filter>
+    </ClCompile>
+    <ClCompile Include="request_handler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="init-controller.cpp">
+      <Filter>Source Files\app\controllers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -83,11 +89,11 @@
     <ClInclude Include="request_handler.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
-    <ClInclude Include="init-controller.h">
-      <Filter>Header Files\app</Filter>
-    </ClInclude>
     <ClInclude Include="platform.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="init-controller.h">
+      <Filter>Header Files\app\controllers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

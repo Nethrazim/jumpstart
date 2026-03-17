@@ -1,23 +1,32 @@
-#include "platform.h"
-#include <unordered_map>
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <unordered_map>
 
-#include "tcp_ip_connection.h"
-#include "blocking_queue.h"
+#include "platform.h"
+#include "app-router.h"
 #include "http_request.h"
 #include "http_response.h"
-#include "app-router.h"
+#include "blocking_queue.h"
+#include "tcp_ip_connection.h"
+
+
 
 class RequestHandler;
 class TcpIpListener;
 
-std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
+AppRouter g_router;
+std::mutex g_connMutex;
+std::vector<std::thread> workers;
+std::atomic<bool> g_running{ true };
+TcpIpListener* g_tcpIpListener = nullptr;
 BlockingQueue<HttpRequest> g_requestQueue;
 BlockingQueue<HttpResponse> g_responseQueue;
-std::vector<std::thread> workers;
 std::vector<RequestHandler*> g_requestHandlers;
-TcpIpListener* g_tcpIpListener = nullptr;
-AppRouter g_router;
-std::atomic<bool> g_running{ true };
+std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-TODOS::
+::TODOS::
 
 1.body parameters, query parameters, url parameters
 2.http request pipeline for different http methods/support for other http methods
@@ -10,10 +10,13 @@ TODOS::
 *.openssl support(integrate library)
 *.CORS support(HEADERS)
 *.support more headers
-*.chunked encoding
+*.support chunked encoding for uploading
 *.gzip
 *.ioctl(maybe)
 *.maybe linux support
 
 *. implement several load balancing technique
 *. move worker threads 
+*. move all tcp ip listen/loops/handling in TcpIpListener
+*. move socket buffer parsing into http request into a static object
+*. study timing constraings of http servers
