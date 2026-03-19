@@ -6,7 +6,6 @@
 #include "request_handler.h"
 
 
-
 extern AppRouter g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::atomic<bool> g_running;
