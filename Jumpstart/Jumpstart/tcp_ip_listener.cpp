@@ -211,6 +211,7 @@ void TcpIpListener::handleRead(socket_t fd) {
 
 	while (true) {
 		int n = recv(fd, buf, sizeof(buf), 0);
+
 		if (n > 0) {
 			std::lock_guard<std::mutex> lock(g_connMutex);
 			auto it = g_tcpIpConnections.find(fd);
@@ -220,6 +221,7 @@ void TcpIpListener::handleRead(socket_t fd) {
 		}
 		else if (n == 0) {
 			std::cout << "Client closed " << fd << "\n";
+			//TODO remove connection if client conn closed
 			closeConnection(fd);
 			return;
 		}
@@ -290,6 +292,8 @@ void TcpIpListener::handleWrite(socket_t fd) {
 
 
 void TcpIpListener::tcpServerLoop(socket_t listenSock) {
+
+	if(listenSocket)
 	while (g_running) {
 
 		std::vector<pollfd_t> fileDescriptors;

@@ -10,7 +10,7 @@ Response* InitController::handleGet(const Request& req)
         std::string body;
         body.reserve(15000);  // Pre-allocate to avoid reallocations
 
-        // Header and styles
+        
         body += R"(<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -304,7 +304,6 @@ Response* InitController::handleGet(const Request& req)
   </div>
 </body>
 </html>)";
-
         return body;
     }();  // ← Immediately invoked lambda (executes once)
 
