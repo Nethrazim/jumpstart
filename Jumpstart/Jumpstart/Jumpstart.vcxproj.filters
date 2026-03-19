@@ -43,6 +43,15 @@
     <Filter Include="Source Files\app\views">
       <UniqueIdentifier>{9c1e6e39-3e4d-4718-a147-448342e50d2a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\app\routes">
+      <UniqueIdentifier>{b827905c-dc4e-4f56-aac3-3bcddf47e13b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\app\routes">
+      <UniqueIdentifier>{e1b8a50f-e497-406f-b782-3181807655e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\platform">
+      <UniqueIdentifier>{d68a8e7c-97d3-4744-8e4a-07ad8c461c54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="global_variables.cpp">
@@ -51,26 +60,26 @@
     <ClCompile Include="tcp_ip_listener.cpp">
       <Filter>Source Files\http_server</Filter>
     </ClCompile>
-    <ClCompile Include="router.cpp">
-      <Filter>Header Files\mvc</Filter>
-    </ClCompile>
-    <ClCompile Include="jumpstart.cpp">
-      <Filter>Header Files\mvc</Filter>
-    </ClCompile>
-    <ClCompile Include="app-router.cpp">
-      <Filter>Source Files\app</Filter>
-    </ClCompile>
-    <ClCompile Include="http-parser.cpp">
-      <Filter>Header Files\http_server</Filter>
-    </ClCompile>
-    <ClCompile Include="request_handler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="init-controller.cpp">
       <Filter>Source Files\app\controllers</Filter>
     </ClCompile>
     <ClCompile Include="resume.cpp">
       <Filter>Source Files\app\views</Filter>
+    </ClCompile>
+    <ClCompile Include="app-router.cpp">
+      <Filter>Source Files\app\routes</Filter>
+    </ClCompile>
+    <ClCompile Include="http-parser.cpp">
+      <Filter>Source Files\http_server</Filter>
+    </ClCompile>
+    <ClCompile Include="request_handler.cpp">
+      <Filter>Source Files\http_server</Filter>
+    </ClCompile>
+    <ClCompile Include="jumpstart.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="router.cpp">
+      <Filter>Source Files\mvc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,26 +95,26 @@
     <ClInclude Include="request_handler.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
-    <ClInclude Include="platform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="init-controller.h">
       <Filter>Header Files\app\controllers</Filter>
     </ClInclude>
-    <ClInclude Include="http_request.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="http_response.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tcp_ip_connection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="app-router.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="resume.h">
       <Filter>Header Files\app\views</Filter>
+    </ClInclude>
+    <ClInclude Include="app-router.h">
+      <Filter>Header Files\app\routes</Filter>
+    </ClInclude>
+    <ClInclude Include="http_request.h">
+      <Filter>Header Files\http_server</Filter>
+    </ClInclude>
+    <ClInclude Include="http_response.h">
+      <Filter>Header Files\http_server</Filter>
+    </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>Header Files\http_server</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp_ip_connection.h">
+      <Filter>Header Files\http_server</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

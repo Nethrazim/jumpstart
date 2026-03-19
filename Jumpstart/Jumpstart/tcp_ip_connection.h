@@ -1,7 +1,8 @@
 #pragma once
 
-#include "platform.h"
 #include <string>
+#include "platform.h"
+
 
 struct TcpIpConnection {
 	socket_t fd = INVALID_SOCKET;

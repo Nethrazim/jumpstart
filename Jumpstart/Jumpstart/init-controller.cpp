@@ -1,7 +1,9 @@
 #include <string>
+
+#include "resume.h"
 #include "init-controller.h"
 #include "http_response.h"
-#include "resume.h"
+
 
 Response* InitController::handleGet(const Request& req)
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "platform.h"
-#include <string>
 #include <map>
+#include <string>
+#include "platform.h"
 
 using std::map;
 using std::string;
