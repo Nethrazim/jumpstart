@@ -37,11 +37,11 @@ void Router::del(const string& pattern, Handler handler)
 void Router::dispatch(const HttpRequest& req, HttpResponse& resp) const {
 	for (const Route& route : routes_) {
 		if (route.method == req.method && route.pattern == req.path) {
-			Response* r = route.handler(Request{ req.method, req.path, req.body, req.headers });
+			Response* controllerResponse = route.handler(Request{ req.method, req.path, req.body, req.headers });
 
-			resp.headers = std::move(r->headers);
-			resp.raw = std::move(r->raw);
-			delete r;
+			resp.headers = std::move(controllerResponse->headers);
+			resp.raw = std::move(controllerResponse->raw);
+			delete controllerResponse;
 			return;
 		}
 	}

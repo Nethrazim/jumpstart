@@ -9,7 +9,6 @@
 #include <condition_variable>
 
 
-
 #include "platform.h"
 #include "http_request.h"
 #include "http_response.h"

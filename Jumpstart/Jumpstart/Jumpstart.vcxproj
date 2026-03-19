@@ -128,14 +128,16 @@
     <ClCompile Include="http-parser.cpp" />
     <ClCompile Include="init-controller.cpp" />
     <ClCompile Include="jumpstart.cpp" />
+    <ClCompile Include="resume.cpp" />
     <ClCompile Include="router.cpp" />
     <ClCompile Include="request_handler.cpp" />
     <ClCompile Include="tcp_ip_listener.cpp" />
   </ItemGroup>
   <ItemGroup>
-	<ClInclude Include="http_request.h" />
+    <ClInclude Include="http_request.h" />
     <ClInclude Include="http_response.h" />
-	<ClInclude Include="tcp_ip_connection.h" />
+    <ClInclude Include="resume.h" />
+    <ClInclude Include="tcp_ip_connection.h" />
     <ClInclude Include="app-router.h" />
     <ClInclude Include="blocking_queue.h" />
     <ClInclude Include="init-controller.h" />

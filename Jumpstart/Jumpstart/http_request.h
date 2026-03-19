@@ -1,9 +1,10 @@
 #pragma once
 
-#include "platform.h"
-#include <string>
 #include <map>
+#include <string>
 #include <iostream>
+#include "platform.h"
+
 using std::cout; using std::endl;
 using std::string;
 using std::map;
