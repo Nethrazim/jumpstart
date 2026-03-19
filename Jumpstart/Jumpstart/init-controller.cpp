@@ -16,135 +16,384 @@ Response* InitController::handleGet(const Request& req)
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Professional Resume - Full Stack Developer</title>
+  <title>Vlad Branzei - Full Stack Developer</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 2rem 1rem;
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.7;
+      color: #1a202c;
+      background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+      background-size: 400% 400%;
+      animation: gradientShift 15s ease infinite;
+      padding: 3rem 1.5rem;
+      min-height: 100vh;
+    }
+
     .resume {
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: white;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 30px 90px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15);
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .header {
+      position: relative;
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+      color: white;
+      padding: 4rem 2.5rem 3rem;
+      text-align: center;
       overflow: hidden;
     }
-    .header {
-      background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-      color: white;
-      padding: 3rem 2rem;
-      text-align: center;
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(102,126,234,0.1) 0%, transparent 100%);
+      opacity: 0.3;
     }
-    .header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; font-weight: 700; }
-    .header .title { font-size: 1.3rem; color: #a0aec0; margin-bottom: 1rem; }
-    .header .experience-badge {
-      display: inline-block;
-      background: #667eea;
-      padding: 0.5rem 1.5rem;
-      border-radius: 25px;
-      font-weight: 600;
-      margin-top: 1rem;
+
+    .header-content { position: relative; z-index: 1; }
+
+    .name { 
+      font-size: 3.5rem; 
+      font-weight: 800; 
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 0%, #e2e8f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
-    .content { padding: 2rem; }
-    .section { margin-bottom: 2.5rem; }
-    .section-title {
-      font-size: 1.8rem;
-      color: #2d3748;
-      border-bottom: 3px solid #667eea;
-      padding-bottom: 0.5rem;
+
+    .role { 
+      font-size: 1.5rem; 
+      color: #cbd5e0;
+      font-weight: 300;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: #a0aec0;
       margin-bottom: 1.5rem;
+      font-weight: 400;
+    }
+
+    .experience-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(102,126,234,0.2);
+      border: 2px solid rgba(102,126,234,0.3);
+      padding: 0.75rem 1.75rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .experience-badge:hover {
+      background: rgba(102,126,234,0.3);
+      border-color: rgba(102,126,234,0.5);
+      transform: translateY(-2px);
+    }
+
+    .experience-badge::before {
+      content: '⚡';
+      font-size: 1.2rem;
+    }
+
+    .content { padding: 3rem 2.5rem; }
+
+    .section { margin-bottom: 3.5rem; }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      border-image-slice: 1;
       display: flex;
       align-items: center;
-    }
-    .section-title::before {
-      content: '';
-      width: 6px;
-      height: 30px;
-      background: #667eea;
-      margin-right: 1rem;
-      border-radius: 3px;
-    }
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
     }
-    .skill-category {
-      background: #f7fafc;
-      padding: 1rem;
-      border-radius: 8px;
-      border-left: 4px solid #667eea;
+
+    .section-title::before {
+      content: '';
+      width: 8px;
+      height: 40px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(102,126,234,0.4);
     }
-    .skill-category h3 { color: #2d3748; font-size: 1.1rem; margin-bottom: 0.5rem; }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .skill-category {
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      padding: 1.5rem;
+      border-radius: 16px;
+      border-left: 5px solid #667eea;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: all 0.3s ease;
+    }
+
+    .skill-category:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(102,126,234,0.15);
+      border-left-color: #764ba2;
+    }
+
+    .skill-category h3 { 
+      color: #2d3748;
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .skill-category h3::before {
+      content: '▸';
+      color: #667eea;
+      font-weight: 800;
+    }
+
     .skill-tag {
       display: inline-block;
-      background: #edf2f7;
+      background: white;
       color: #4a5568;
-      padding: 0.3rem 0.8rem;
-      margin: 0.2rem;
-      border-radius: 15px;
+      padding: 0.5rem 1rem;
+      margin: 0.3rem;
+      border-radius: 20px;
       font-size: 0.9rem;
-      border: 1px solid #cbd5e0;
+      font-weight: 500;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.2s ease;
     }
+
+    .skill-tag:hover {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+    }
+
     .job {
       margin-bottom: 2rem;
-      padding: 1.5rem;
-      background: #f8f9fa;
-      border-radius: 8px;
-      border-left: 4px solid #667eea;
-      transition: transform 0.2s;
+      padding: 2rem;
+      background: linear-gradient(135deg, #ffffff 0%, #f7fafc 100%);
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-    .job:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.2); }
+
+    .job::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 5px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+
+    .job:hover {
+      transform: translateX(5px);
+      box-shadow: 0 8px 30px rgba(102,126,234,0.15);
+    }
+
+    .job:hover::before { width: 8px; }
+
     .job-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
       flex-wrap: wrap;
+      gap: 0.5rem;
     }
-    .company { font-size: 1.4rem; color: #2d3748; font-weight: 700; }
-    .duration { color: #718096; font-size: 0.95rem; font-weight: 600; }
-    .position { font-size: 1.1rem; color: #4a5568; margin-bottom: 0.5rem; font-weight: 600; }
-    .location { color: #a0aec0; font-size: 0.9rem; margin-bottom: 1rem; }
-    .achievements { margin: 1rem 0; }
-    .achievements li { margin-left: 1.5rem; margin-bottom: 0.5rem; color: #4a5568; }
-    .tech-stack { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0; }
-    .tech-label { font-weight: 600; color: #2d3748; font-size: 0.9rem; }
+
+    .company { 
+      font-size: 1.5rem;
+      color: #1a202c;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .duration { 
+      color: #718096;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: #edf2f7;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+    }
+
+    .position { 
+      font-size: 1.15rem;
+      color: #2d3748;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    .location { 
+      color: #a0aec0;
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .location::before { content: '📍'; }
+
+    .achievements { margin: 1.25rem 0; }
+
+    .achievements li {
+      margin-left: 1.5rem;
+      margin-bottom: 0.75rem;
+      color: #4a5568;
+      padding-left: 0.5rem;
+    }
+
+    .achievements li::marker { color: #667eea; }
+
+    .tech-stack {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 2px solid #edf2f7;
+    }
+
+    .tech-label {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
     .project {
       background: white;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
-      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 1.25rem;
+      border-radius: 16px;
       border: 2px solid #e2e8f0;
-      transition: border-color 0.2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transition: all 0.3s ease;
+      position: relative;
     }
-    .project:hover { border-color: #667eea; }
-    .project h3 { color: #2d3748; margin-bottom: 0.5rem; font-size: 1.2rem; }
-    .project a { color: #667eea; text-decoration: none; font-weight: 600; }
-    .project a:hover { text-decoration: underline; }
-    .project-desc { color: #4a5568; margin-top: 0.5rem; }
+
+    .project::after {
+      content: '→';
+      position: absolute;
+      right: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #667eea;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .project:hover {
+      border-color: #667eea;
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(102,126,234,0.2);
+    }
+
+    .project:hover::after {
+      opacity: 1;
+      right: 1.5rem;
+    }
+
+    .project h3 {
+      color: #1a202c;
+      margin-bottom: 0.75rem;
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .project a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    .project a:hover {
+      color: #764ba2;
+      text-decoration: underline;
+    }
+
+    .project-desc {
+      color: #4a5568;
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+
     @media print {
-      body { background: white; padding: 0; }
+      body { background: white; padding: 0; animation: none; }
       .resume { box-shadow: none; }
     }
+
     @media (max-width: 768px) {
-      .header h1 { font-size: 2rem; }
-      .content { padding: 1rem; }
+      body { padding: 1.5rem 1rem; }
+      .header { padding: 3rem 1.5rem 2rem; }
+      .name { font-size: 2.5rem; }
+      .role { font-size: 1.25rem; }
+      .content { padding: 2rem 1.5rem; }
+      .section-title { font-size: 1.6rem; }
+      .skills-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="resume">
     <div class="header">
-      <h1>Full Stack Developer</h1>
-      <h2>Vlad Branzei</h2>
-      <div class="title">Enterprise Applications & Microservices Architect</div>
-      <div class="experience-badge">13+ Years of Professional Experience</div>
+      <div class="header-content">
+        <div class="name">Vlad Branzei</div>
+        <div class="role">Full Stack Developer</div>
+        <div class="tagline">Enterprise Applications & Data Centric Applications</div>
+        <div class="experience-badge">13+ Years of Professional Experience</div>
+      </div>
     </div>
     <div class="content">
       <div class="section">
