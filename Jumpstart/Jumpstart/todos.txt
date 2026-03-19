@@ -20,4 +20,5 @@
 *. move all tcp ip listen/loops/handling in TcpIpListener
 *. move socket buffer parsing into http request into a static object
 *. study timing constraings of http servers
-*. system checks sockets one by one and only after it sends the responses
+*. !!system checks sockets one by one and only after it sends the responses!!
+(each handler / processors should return its own responses)
