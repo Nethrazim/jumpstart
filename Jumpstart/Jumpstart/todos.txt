@@ -10,7 +10,7 @@
 *.openssl support(integrate library)
 *.CORS support(HEADERS)
 *.support more headers
-*.support chunked encoding for uploading
+*.support chunked encoding
 *.gzip
 *.ioctl(maybe)
 *.maybe linux support
