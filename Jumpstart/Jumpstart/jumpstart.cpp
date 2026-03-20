@@ -8,7 +8,6 @@
 #include <unordered_map>
 #include <condition_variable>
 
-
 #include "platform.h"
 #include "app-router.h"
 #include "http_request.h"
@@ -25,10 +24,7 @@ extern AppRouter g_router;
 extern std::atomic<bool> g_running;
 extern TcpIpListener* g_tcpIpListener;
 extern std::vector<std::thread> g_workers;
-extern BlockingQueue<HttpRequest> g_requestQueue;
-extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::vector<RequestHandler*> g_requestHandlers;
-extern std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
 
 
 void spawnTcpHandlers() {
@@ -37,7 +33,7 @@ void spawnTcpHandlers() {
     for (int i = 0; i < nrOfProcessors; ++i) {
         RequestHandler* requestHandler = new RequestHandler();
         g_requestHandlers.push_back(requestHandler);
-        g_workers.emplace_back(&RequestHandler::run, requestHandler);
+        g_workers.emplace_back(&RequestHandler::loop, requestHandler);
     }
 }
 
@@ -57,9 +53,6 @@ int main() {
     g_tcpIpListener->tcpServerLoop(g_tcpIpListener->getListenSocket());
 
     g_running = false;
-
-    g_requestQueue.stop();
-    g_responseQueue.stop();
 
     for (auto& t : g_workers)
         t.join();

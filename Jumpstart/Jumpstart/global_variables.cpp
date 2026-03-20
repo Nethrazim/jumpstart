@@ -19,10 +19,7 @@ std::mutex g_connMutex;
 std::vector<std::thread> g_workers;
 std::atomic<bool> g_running{ true };
 TcpIpListener* g_tcpIpListener = nullptr;
-BlockingQueue<HttpRequest> g_requestQueue;
-BlockingQueue<HttpResponse> g_responseQueue;
 std::vector<RequestHandler*> g_requestHandlers;
-std::unordered_map<socket_t, TcpIpConnection> g_tcpIpConnections;
 
 
 

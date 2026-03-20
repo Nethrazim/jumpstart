@@ -2,6 +2,7 @@
 
 #include "platform.h"
 #include "http_request.h"
+#include "request_handler.h"
 
 class TcpIpListener
 {
@@ -23,10 +24,9 @@ public:
 	void placeHttpRequest(HttpRequest* req);
 	bool tryParseHttpRequest(std::string& buffer, HttpRequest* request);
 
-	void handleRead(socket_t fd);
-	void handleWrite(socket_t fd);
 	void handleAccept(socket_t listenSock);
-	void closeConnection(socket_t fd);
+
+	RequestHandler* pickRequestHandler();
 
 private:
 	socket_t listenSocket;
