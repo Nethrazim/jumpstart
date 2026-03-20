@@ -22,3 +22,4 @@
 *. study timing constraings of http servers
 *. !!system checks sockets one by one and only after it sends the responses!!
 (each handler / processors should return its own responses)
+.* try to bound threads with affinity to a processor

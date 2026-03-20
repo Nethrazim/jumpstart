@@ -30,10 +30,17 @@ extern std::vector<RequestHandler*> g_requestHandlers;
 void spawnTcpHandlers() {
     unsigned int nrOfProcessors = get_processor_count();
 
-    for (int i = 0; i < nrOfProcessors; ++i) {
+    for (unsigned int i = 0; i < nrOfProcessors; ++i) {
         RequestHandler* requestHandler = new RequestHandler();
         g_requestHandlers.push_back(requestHandler);
         g_workers.emplace_back(&RequestHandler::loop, requestHandler);
+
+        // Pin thread to specific CPU core for better cache locality
+        if (Platform::setThreadAffinity(g_workers.back().native_handle(), i)) {
+            std::cout << "Thread " << i << " pinned to CPU core " << i << "\n";
+        } else {
+            std::cerr << "Warning: Failed to pin thread " << i << " to core " << i << "\n";
+        }
     }
 }
 

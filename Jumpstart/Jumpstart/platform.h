@@ -1,5 +1,7 @@
 #pragma once
 
+#include <thread>
+
 // Platform abstraction layer for Windows/Linux compatibility
 
 #ifdef _WIN32
@@ -89,12 +91,27 @@ namespace Platform {
         return true; // Linux doesn't need socket initialization
 #endif
     }
-    
+
     inline void cleanup() {
 #ifdef _WIN32
         WSACleanup();
 #else
         // Nothing to do on Linux
+#endif
+    }
+
+    // Thread affinity - pin thread to specific CPU core
+    inline bool setThreadAffinity(std::thread::native_handle_type threadHandle, unsigned int coreId) {
+#ifdef _WIN32
+        DWORD_PTR mask = 1ULL << coreId;
+        DWORD_PTR result = SetThreadAffinityMask(threadHandle, mask);
+        return result != 0;
+#else
+        cpu_set_t cpuset;
+        CPU_ZERO(&cpuset);
+        CPU_SET(coreId, &cpuset);
+        int result = pthread_setaffinity_np(threadHandle, sizeof(cpu_set_t), &cpuset);
+        return result == 0;
 #endif
     }
 }
