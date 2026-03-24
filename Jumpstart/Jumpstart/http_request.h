@@ -11,6 +11,7 @@ using std::map;
 
 struct HttpRequest
 {
+	string originalBuffer;
 	socket_t fd = INVALID_SOCKET;
 	string method;
 	string path;

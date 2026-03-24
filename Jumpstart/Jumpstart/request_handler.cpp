@@ -56,17 +56,15 @@ void RequestHandler::handleRead(socket_t fd) {
     }
 
     HttpRequest* req = new HttpRequest();
-    {
-        auto it = tcpIpConnections_.find(fd);
-        if (it == tcpIpConnections_.end()) {
-            delete req;
-            return;
-        }
+    auto it = tcpIpConnections_.find(fd);
+    if (it == tcpIpConnections_.end()) {
+        delete req;
+        return;
+    }
 
-        if (!parseHttpRequest(it->second.readBuf, req)) {
-            delete req;
-    
-        }
+    if (!parseHttpRequest(it->second.readBuf, req)) {
+        delete req;
+        return;
     }
 
     req->fd = fd;
