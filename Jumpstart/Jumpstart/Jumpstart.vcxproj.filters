@@ -116,6 +116,9 @@
     <ClInclude Include="tcp_ip_connection.h">
       <Filter>Header Files\http_server</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files\mvc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="todos.txt" />

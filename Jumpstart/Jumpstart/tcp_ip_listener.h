@@ -16,22 +16,21 @@ public:
 	bool socketListen();
 
 	static TcpIpListener* getInstance();
-
 	socket_t& getListenSocket();
 	void tcpServerLoop(socket_t listenSock);
-	void release();
-	void drainWorkerResponses();
-	void placeHttpRequest(HttpRequest* req);
-	bool tryParseHttpRequest(std::string& buffer, HttpRequest* request);
-
 	void handleAccept(socket_t listenSock);
+	void release();
+
+	void placeHttpRequest(HttpRequest* req);
 
 	RequestHandler* pickRequestHandler();
 
 private:
 	socket_t listenSocket;
 	sockaddr_in addr{};
+
 	TcpIpListener();
 	static TcpIpListener* instance_;
+
 	~TcpIpListener();
 };

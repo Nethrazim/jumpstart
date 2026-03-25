@@ -12,7 +12,7 @@ extern AppRouter g_router;
 extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::atomic<bool> g_running;
 
-bool parseHttpRequest(std::string& buffer, HttpRequest* request);
+bool parseHttpRequest(std::string& buffer, HttpRequest* request, TcpIpConnection& tcpIpConnection);
 
 void RequestHandler::pushHttpRequest(HttpRequest* req)
 {
@@ -29,7 +29,7 @@ void RequestHandler::closeConnection(socket_t fd) {
 
 void RequestHandler::handleRead(socket_t fd) {
     char buf[4096];
-
+    
     while (true) {
         int n = recv(fd, buf, sizeof(buf), 0);
 
@@ -55,21 +55,25 @@ void RequestHandler::handleRead(socket_t fd) {
         }
     }
 
-    HttpRequest* req = new HttpRequest();
     auto it = tcpIpConnections_.find(fd);
     if (it == tcpIpConnections_.end()) {
-        delete req;
         return;
     }
 
-    if (!parseHttpRequest(it->second.readBuf, req)) {
-        delete req;
-        return;
+    if (nullptr == it->second.currentRequest)
+    {
+        it->second.currentRequest = new HttpRequest(fd);
     }
 
-    req->fd = fd;
+    if (!parseHttpRequest(it->second.readBuf, it->second.currentRequest, it->second)) {
+        return;  // Incomplete request, wait for more data
+    }
 
-    requestQueue_.push(req);
+    //place currentRequest on the request queue
+    requestQueue_.push(it->second.currentRequest);
+
+    //prepare for next request incoming from the same connection
+    it->second.currentRequest = nullptr;
 }
 
 
@@ -126,7 +130,6 @@ void RequestHandler::drainWorkerResponses() {
     }
 }
 
-//TODO : i need to check if socket is ready for write, if not retry 
 void RequestHandler::loop()
 {
     while (g_running) {

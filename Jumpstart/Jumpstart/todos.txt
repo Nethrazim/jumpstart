@@ -23,3 +23,9 @@
 *. !!system checks sockets one by one and only after it sends the responses!!
 (each handler / processors should return its own responses)
 .* try to bound threads with affinity to a processor
+
+.* parseHttpRequest executes multiple times 
+for the same http request. because the streaming 
+might not be over yet so i need to make the parsing methods 
+not depend on eachother so i can process only what's left
+

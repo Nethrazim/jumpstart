@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "http_request.h"
+#include "tcp_ip_connection.h"
 
 using std::string;
 using std::map;
@@ -13,61 +14,89 @@ bool mapHttpLine(std::string& headersBuffer, HttpRequest* request);
 void mapHeaders(std::string& headersBuffer, HttpRequest* request);
 
 
-bool parseHttpRequest(std::string& buffer, HttpRequest* request)
+bool parseHttpRequest(std::string& buffer, HttpRequest* request, TcpIpConnection& tcpIpConnection)
 {
 	
 	if (buffer == "")
 		return false;
 
-
-	std::string clonedBuffer = buffer;
+	request->buffer = buffer;
 	
 	
-	std::string headersBuffer = "";
-	std::string bodyBuffer = "";
+	std::string& headersBuffer = request->headersBuffer;
+	std::string& bodyBuffer = request->bodyBuffer;
 
-	if (!extractBodyAndHeader(clonedBuffer, headersBuffer, bodyBuffer))
-	{
-		return false;
-	}
+	//if (!tcpIpConnection.isHeadersParsed)
+	//{
+		if (!extractBodyAndHeader(request->buffer, headersBuffer, bodyBuffer))
+		{
+			return false;
+		}
+	//}
 
-	if (!mapHttpLine(headersBuffer, request))
-	{
-		return false;
-	}
+	
+//	if (!tcpIpConnection.isHttpLineParsed)
+//	{
+		if (!mapHttpLine(headersBuffer, request))
+		{
+			return false;
+		}
+
+		tcpIpConnection.isHttpLineParsed = true;
+	//}
+	
 
 	mapHeaders(headersBuffer, request);
+	//tcpIpConnection.isHeadersParsed = true;
+
+	//if (!tcpIpConnection.isBodyParsed)
+	//{
+		int contentLength = 0;
+		bool isChunkedEncoding = false;
+
+
+		if (request->headers.find("Content-Length") != request->headers.end())
+		{
+			//is not chunked encoding
+			contentLength = std::stoi(request->headers.find("Content-Length")->second);
+			isChunkedEncoding = false;
+		}
+		else if (request->headers.find("Transfer-Encoding") != request->headers.end())
+		{
+			isChunkedEncoding = true;
+		}
+
+		if (!isChunkedEncoding && bodyBuffer.length() < contentLength)
+		{
+			return false;
+		}
+
+		if (isChunkedEncoding && bodyBuffer.find("0\r\n\r\n") == std::string::npos)
+		{
+			return false;
+		}
+
+		if (request->method == "POST"
+			|| request->method == "PUT"
+			|| request->method == "PATCH") {
+			
+		//	tcpIpConnection.isBodyParsed = true;
+			request->body = bodyBuffer;
+		}
+
+		
+
+		
+	//}
 	
-	int contentLength = 0;
 
-	if (request->headers.find("Content-Length") != request->headers.end())
-	{
-		contentLength = std::stoi(request->headers.find("Content-Length")->second);
-	}
+	tcpIpConnection.resetParsingState();
 
-	if (contentLength > 0 && bodyBuffer.length() < contentLength)
-	{
-		return false;
-	}
-
-	request->body = bodyBuffer;
-
-	//todo CHECK IF BODY EXISTS ETC ETC ETC
-	if (request->method == "POST" )
-	{
-		cout << "ITS A POST METHOD" << endl;
-	}
-
-
-	
-	//TODO check this because parseHttpRequest at some 
-	//point runs useless
-	buffer = "";
 	return true;
 }
 
 bool extractBodyAndHeader(std::string& clonedBuffer, std::string& headersBuffer, std::string& bodyBuffer) {
-
+	
 	size_t pos = clonedBuffer.find("\r\n\r\n");
 	if (pos == std::string::npos)
 	{

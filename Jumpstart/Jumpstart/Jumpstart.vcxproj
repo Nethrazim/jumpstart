@@ -136,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="http_request.h" />
     <ClInclude Include="http_response.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="resume.h" />
     <ClInclude Include="tcp_ip_connection.h" />
     <ClInclude Include="app-router.h" />

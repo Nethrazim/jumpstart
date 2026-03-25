@@ -24,8 +24,6 @@ extern BlockingQueue<HttpResponse> g_responseQueue;
 extern std::mutex g_connMutex;
 extern std::vector<RequestHandler*> g_requestHandlers;
 
-bool parseHttpRequest(std::string&, HttpRequest* out);
-
 TcpIpListener::TcpIpListener() {
 	isInitialized = false;
 	isBound = false;
@@ -170,7 +168,7 @@ void TcpIpListener::handleAccept(socket_t listenSock) {
 
 		SET_NONBLOCKING(client);
 
-		pickRequestHandler()->tcpIpConnections_.emplace(client, TcpIpConnection{ client });
+		pickRequestHandler()->tcpIpConnections_.emplace(client, TcpIpConnection{client});
 
 		std::cout << "Accepted client " << client << "\n";
 	}
@@ -194,17 +192,11 @@ void TcpIpListener::placeHttpRequest(HttpRequest* req)
 void TcpIpListener::tcpServerLoop(socket_t listenSock) {
 	
 	while (g_running) {
-		//TODO eliminate this fileDescriptor 
-		//just to hold the listenSock
-		std::vector<pollfd_t> fileDescriptors;
-
 		pollfd_t lf{};
 		lf.fd = listenSock;
 		lf.events = POLLRDNORM;
 
-		fileDescriptors.push_back(lf);
-
-		int n = POLL(fileDescriptors.data(), fileDescriptors.size(), 100);
+		int n = POLL(&lf, 1, 100);
 
 		if (n == SOCKET_ERROR) {
 			int err = GET_SOCKET_ERROR();
@@ -212,11 +204,10 @@ void TcpIpListener::tcpServerLoop(socket_t listenSock) {
 			continue;
 		}
 
-		for (auto& p : fileDescriptors) {
-			if (p.revents & POLLRDNORM)
-				handleAccept(listenSock);
+		if (lf.revents & POLLRDNORM) {
+			handleAccept(listenSock);
 		}
-
+			
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	}
 }

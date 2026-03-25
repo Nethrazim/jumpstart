@@ -12,15 +12,25 @@ using std::map;
 struct HttpRequest
 {
 	string originalBuffer;
+
+	string buffer = "";
+	string headersBuffer = "";
+	string bodyBuffer = "";
+
 	socket_t fd = INVALID_SOCKET;
 	string method;
 	string path;
 	string body;
 	map<string, string> headers;
+	
+	
 
 	//Default constructor
 	HttpRequest() {
 		cout << "HttpRequest() default - " << this << std::endl;
+	}
+
+	HttpRequest(socket_t fd) : fd(fd) {
 	}
 
 	//Copy constructor
@@ -43,7 +53,8 @@ struct HttpRequest
 	}
 };
 
-struct Request 
+//TODO what about this , is it necessary ?
+struct Request
 {
 	string method;
 	string path;
